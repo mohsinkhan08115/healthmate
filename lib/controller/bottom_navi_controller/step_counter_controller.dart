@@ -6,6 +6,7 @@ import 'package:healthmate/models/chart_model.dart';
 import 'package:healthmate/models/food_model.dart';
 import 'package:hive/hive.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart'; // ADDED
 import 'package:healthmate/services/step_service.dart';
 
 class StepsController extends GetxController with WidgetsBindingObserver {
@@ -21,6 +22,12 @@ class StepsController extends GetxController with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       saveSteps();
+    }
+
+    // ADDED: when app comes back to foreground, pull in any steps
+    // counted by the background isolate while the app was closed/minimized.
+    if (state == AppLifecycleState.resumed) {
+      mergeBackgroundSteps().then((_) => loadTodaySteps());
     }
   }
 
@@ -89,19 +96,26 @@ class StepsController extends GetxController with WidgetsBindingObserver {
     stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
   }
 
-  // ADDED: merge steps counted by the background isolate while app was closed
+  // CHANGED: now reads from FlutterForegroundTask's own storage instead of
+  // Hive, because two isolates writing to the same Hive box concurrently
+  // was causing "Recovering corrupted box" and losing recent step data.
   Future<void> mergeBackgroundSteps() async {
     final todayKey = getTodayKey();
-    final bgSteps = stepsBox.get('bg_steps_$todayKey', defaultValue: 0) as int;
+    final bgSteps =
+        await FlutterForegroundTask.getData<int>(key: 'bg_steps_$todayKey') ??
+        0;
     if (bgSteps > 0) {
       final userKey = getUserKey(todayKey);
       if (userKey == null) return;
       final current = stepsBox.get(userKey, defaultValue: 0) as int;
-      final merged = current + bgSteps;
+      final merged = bgSteps > current ? bgSteps : current;
       await stepsBox.put(userKey, merged);
       // Clear background counter so it isn't double-added next time
-      await stepsBox.put('bg_steps_$todayKey', 0);
-      await stepsBox.put('bg_baseline_$todayKey', -1);
+      await FlutterForegroundTask.saveData(key: 'bg_steps_$todayKey', value: 0);
+      await FlutterForegroundTask.saveData(
+        key: 'bg_baseline_$todayKey',
+        value: -1,
+      );
     }
   }
 

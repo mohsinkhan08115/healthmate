@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
 import 'package:healthmate/models/food_model.dart';
@@ -20,10 +21,11 @@ class _AddFoodImageState extends State<AddFoodImage> {
   final ImagePicker picker = ImagePicker();
   bool isScanning = false;
 
-  static const String _geminiApiKey =
-      "Your_Gemini_API_Key_Here"; // Replace with your actual Gemini API key
+  String get _geminiApiKey =>
+      dotenv.env['GEMINI_API_KEY'] ??
+      ''; // Make sure to set this in your .env file
 
-  static const String _geminiUrl =
+  String get _geminiUrl =>
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$_geminiApiKey";
 
   Future<void> pickImage(ImageSource source) async {

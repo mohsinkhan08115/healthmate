@@ -1,22 +1,24 @@
 import 'dart:async';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:pedometer/pedometer.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 /// Runs in a background isolate that survives even when the app UI/process
-/// is closed. This is where the ACTUAL sensor listening must happen —
-/// listening in the main isolate (old approach) dies when the app closes.
+/// is closed. Uses FlutterForegroundTask's own storage (NOT Hive) because
+/// Hive is not safe for concurrent writes from two isolates at once —
+/// that was causing "Recovering corrupted box" and silent data loss.
 class StepForegroundHandler extends TaskHandler {
   StreamSubscription<StepCount>? _subscription;
-  Box? _stepsBox;
+  int _baseline = -1;
+  String _cachedDateKey = '';
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
-    // Hive needs to be initialized again here — separate isolate,
-    // separate memory space from your main app.
-    await Hive.initFlutter();
-    _stepsBox = await Hive.openBox('stepsBox');
+    _cachedDateKey = _todayKey;
+    _baseline =
+        await FlutterForegroundTask.getData<int>(
+          key: 'bg_baseline_$_cachedDateKey',
+        ) ??
+        -1;
 
     _subscription = Pedometer.stepCountStream.listen(
       _onStepCount,
@@ -24,32 +26,39 @@ class StepForegroundHandler extends TaskHandler {
     );
   }
 
-  void _onStepCount(StepCount event) {
+  Future<void> _onStepCount(StepCount event) async {
     final rawSteps = event.steps;
     final todayKey = _todayKey;
 
-    // baseline = raw sensor value recorded at the start of today
-    int baseline = _stepsBox?.get('bg_baseline_$todayKey', defaultValue: -1);
-
-    if (baseline == -1 || rawSteps < baseline) {
-      // first run today, OR device rebooted (sensor resets on reboot)
-      baseline = rawSteps;
-      _stepsBox?.put('bg_baseline_$todayKey', baseline);
+    // Date changed since task started — reset for the new day
+    if (todayKey != _cachedDateKey) {
+      _cachedDateKey = todayKey;
+      _baseline = -1;
     }
 
-    final todaySteps = rawSteps - baseline;
+    if (_baseline == -1 || rawSteps < _baseline) {
+      // first run today, OR device rebooted (sensor resets on reboot)
+      _baseline = rawSteps;
+      await FlutterForegroundTask.saveData(
+        key: 'bg_baseline_$todayKey',
+        value: _baseline,
+      );
+    }
 
-    // This key format MATCHES what StepsController already reads:
-    // "${uid}_${dateKey}" — but background isolate has no Firebase user,
-    // so we store under a neutral key and merge it on the UI side.
-    _stepsBox?.put('bg_steps_$todayKey', todaySteps);
+    final todaySteps = rawSteps - _baseline;
+
+    // Uses flutter_foreground_task's own isolate-safe storage —
+    // NOT Hive — to avoid concurrent-write corruption.
+    await FlutterForegroundTask.saveData(
+      key: 'bg_steps_$todayKey',
+      value: todaySteps,
+    );
 
     FlutterForegroundTask.updateService(
       notificationTitle: 'HealthMate',
       notificationText: '$todaySteps steps today',
     );
 
-    // Pushes live value to the UI isolate IF the app is currently open
     FlutterForegroundTask.sendDataToMain(todaySteps);
   }
 
@@ -59,7 +68,22 @@ class StepForegroundHandler extends TaskHandler {
   }
 
   @override
-  Future<void> onRepeatEvent(DateTime timestamp) async {}
+  Future<void> onRepeatEvent(DateTime timestamp) async {
+    // Runs every minute (see step_service_manager.dart) even if no
+    // steps have been taken yet — makes sure the notification resets
+    // right at midnight instead of waiting for the next step.
+    final todayKey = _todayKey;
+    if (todayKey != _cachedDateKey) {
+      _cachedDateKey = todayKey;
+      _baseline = -1;
+
+      FlutterForegroundTask.updateService(
+        notificationTitle: 'HealthMate',
+        notificationText: '0 steps today',
+      );
+      FlutterForegroundTask.sendDataToMain(0);
+    }
+  }
 
   @override
   Future<void> onDestroy(DateTime timestamp) async {

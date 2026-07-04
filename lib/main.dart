@@ -22,6 +22,9 @@ void main() async {
   // Step 1: Open ALL boxes first
   await Hive.openBox('profileBox');
   await Hive.openBox('stepsBox');
+  await Hive.box(
+    'stepsBox',
+  ).compact(); // ADDED: reduces risk of corruption from abrupt process kills
   await Hive.openBox('foodBox');
   await Hive.openBox('reminderBox');
   await Hive.openBox('historyBox');
