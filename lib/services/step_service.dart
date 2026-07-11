@@ -1,71 +1,81 @@
-import 'dart:async';
-import 'package:pedometer/pedometer.dart';
-import 'package:healthmate/services/step_service_manager.dart'; // ADDED
+import 'package:flutter/services.dart';
 
+/// Thin bridge to the native step counter.
+///
+/// All actual step counting happens in StepCounterService.kt — a native
+/// Android foreground service that keeps running (and keeps showing the
+/// notification) even when this Flutter engine is not running, and is
+/// restarted directly by BootReceiver after a device reboot.
+///
+/// This class does NOT count steps itself and does NOT use pedometer or
+/// flutter_foreground_task — those were removed because running a second,
+/// independent step-counting/notification pipeline alongside the native
+/// service was causing the notification conflicts and step-count drift.
 class StepService {
-  static final StepService _instance = StepService._internal();
+  static const MethodChannel _channel = MethodChannel(
+    'com.example.healthmate/steps',
+  );
 
-  factory StepService() => _instance;
+  static final List<Function(int)> _listeners = [];
+  static bool _handlerAttached = false;
 
-  StepService._internal();
-
-  bool _isListening = false;
-
-  final List<Function(int)> _listeners = [];
-
-  StreamSubscription<StepCount>? _subscription;
-
-  // ─── Public static API ───────────────────────────────────────────────
-
+  /// Registers [onUpdate] to be called whenever the native service reports
+  /// a new step count, and makes sure the native service is running.
   static void initSteps(Function(int) onUpdate) {
-    _instance._addListener(onUpdate);
-    _instance._startListening();
-  }
-
-  static void removeListener(Function(int) listener) {
-    _instance._listeners.remove(listener);
-  }
-
-  static void dispose() {
-    _instance._stopListening();
-  }
-
-  // ─── Private instance methods ────────────────────────────────────────
-
-  void _addListener(Function(int) onUpdate) {
     if (!_listeners.contains(onUpdate)) {
       _listeners.add(onUpdate);
     }
+    _attachHandler();
+    // Idempotent — safe to call even if the service is already running.
+    _channel.invokeMethod('startStepService');
   }
 
-  void _startListening() {
-    if (_isListening) return;
+  static void removeListener(Function(int) listener) {
+    _listeners.remove(listener);
+  }
 
-    _isListening = true;
-
-    // ADDED: start the foreground service so Android doesn't kill this
-    // process (and this pedometer subscription) when the app UI is closed.
-    StepServiceManager.requestPermissions();
-    StepServiceManager.startService();
-
-    _subscription = Pedometer.stepCountStream.listen(
-      (StepCount event) {
-        for (var listener in List.from(_listeners)) {
-          listener(event.steps);
+  static void _attachHandler() {
+    if (_handlerAttached) return;
+    _handlerAttached = true;
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onStepUpdate') {
+        final steps = call.arguments as int;
+        for (final listener in List<Function(int)>.from(_listeners)) {
+          listener(steps);
         }
-      },
-      onError: (error) {
-        print("Pedometer Error: $error");
-      },
-    );
+      }
+    });
   }
 
-  void _stopListening() {
-    _subscription?.cancel();
-    _subscription = null;
-    _isListening = false;
+  /// Pull-based sync — call on app resume / cold start to fetch whatever
+  /// the native service has recorded, in case a push update (onStepUpdate)
+  /// was missed while the app process wasn't alive.
+  static Future<int> getStepsToday() async {
+    try {
+      return await _channel.invokeMethod<int>('getStepsToday') ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
 
-    // ADDED: stop the foreground service when no one is listening anymore
-    StepServiceManager.stopService();
+  /// Opens the manufacturer's autostart / background-activity settings
+  /// screen (Xiaomi/Oppo/Vivo/Huawei have their own, separate from
+  /// Android's own permission system). Wire this to a button in your
+  /// Settings screen with an explanation, e.g. "If step tracking stops
+  /// after restarting your phone, tap here to allow HealthMate to
+  /// auto-start." Don't call this without user context — jumping
+  /// straight to an OEM settings screen with no explanation is confusing.
+  static Future<void> openAutoStartSettings() async {
+    try {
+      await _channel.invokeMethod('openAutoStartSettings');
+    } catch (_) {}
+  }
+
+  static Future<bool> needsAutoStartSettings() async {
+    try {
+      return await _channel.invokeMethod<bool>('needsAutoStartSettings') ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 }

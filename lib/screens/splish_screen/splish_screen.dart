@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/screens/auth_screens/wrapper.dart';
 

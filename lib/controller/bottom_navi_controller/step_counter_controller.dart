@@ -6,17 +6,15 @@ import 'package:healthmate/models/chart_model.dart';
 import 'package:healthmate/models/food_model.dart';
 import 'package:hive/hive.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart'; // ADDED
 import 'package:healthmate/services/step_service.dart';
 
 class StepsController extends GetxController with WidgetsBindingObserver {
   late Box stepsBox;
   RxInt steps = 0.obs;
   final RxList<foodModel> foods = <foodModel>[].obs;
-  int lastSavedSteps = 0;
   Timer? _saveTimer;
   String? uid;
-  String? email;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
@@ -24,10 +22,11 @@ class StepsController extends GetxController with WidgetsBindingObserver {
       saveSteps();
     }
 
-    // ADDED: when app comes back to foreground, pull in any steps
-    // counted by the background isolate while the app was closed/minimized.
+    // When the app comes back to the foreground, pull whatever the native
+    // service recorded while we were away — covers the case where a push
+    // update (onStepUpdate) was missed because the engine wasn't alive.
     if (state == AppLifecycleState.resumed) {
-      mergeBackgroundSteps().then((_) => loadTodaySteps());
+      syncFromNative();
     }
   }
 
@@ -37,17 +36,11 @@ class StepsController extends GetxController with WidgetsBindingObserver {
   int stepgoal = 10000;
   RxList<ChartModel> chartData = <ChartModel>[].obs;
 
-  //steps{
-
   Function(int)? _stepListener;
-
-  int baseSensorSteps = 0;
-  int savedSteps = 0;
-  bool isFirstSensorValue = true;
   String currentDateKey = "";
+
   String getTodayKey() {
     final now = DateTime.now();
-
     return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
 
@@ -55,67 +48,47 @@ class StepsController extends GetxController with WidgetsBindingObserver {
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid;
     if (uid == null) return null;
-
     return "${uid}_$date";
   }
-  // steps hive{
 
   Future<void> saveSteps() async {
-    final dateKey = getTodayKey();
-    final userKey = getUserKey(dateKey);
-
+    final userKey = getUserKey(getTodayKey());
     if (userKey == null) return;
-
     await stepsBox.put(userKey, steps.value);
   }
 
   Future<void> initTodayEntry() async {
-    final dateKey = getTodayKey();
-    final userKey = getUserKey(dateKey);
-
+    final userKey = getUserKey(getTodayKey());
     if (userKey == null) return;
-
     if (!stepsBox.containsKey(userKey)) {
       await stepsBox.put(userKey, 0);
     }
   }
 
-  //}
+  /// Loads today's steps: Hive is just a local cache here, the native
+  /// service is the source of truth, so we take whichever is higher.
   Future<void> loadTodaySteps() async {
-    final dateKey = getTodayKey();
-    final userKey = getUserKey(dateKey);
-    print("USER KEY: $userKey");
-    print("STORED VALUE: ${stepsBox.get(userKey)}");
+    final userKey = getUserKey(getTodayKey());
     if (userKey == null) return;
-    savedSteps = stepsBox.get(userKey, defaultValue: 0);
 
-    lastSavedSteps = savedSteps;
+    var savedSteps = stepsBox.get(userKey, defaultValue: 0) as int;
+
+    final nativeSteps = await StepService.getStepsToday();
+    if (nativeSteps > savedSteps) savedSteps = nativeSteps;
 
     steps.value = savedSteps;
-
     stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
+    await saveSteps();
   }
 
-  // CHANGED: now reads from FlutterForegroundTask's own storage instead of
-  // Hive, because two isolates writing to the same Hive box concurrently
-  // was causing "Recovering corrupted box" and losing recent step data.
-  Future<void> mergeBackgroundSteps() async {
-    final todayKey = getTodayKey();
-    final bgSteps =
-        await FlutterForegroundTask.getData<int>(key: 'bg_steps_$todayKey') ??
-        0;
-    if (bgSteps > 0) {
-      final userKey = getUserKey(todayKey);
-      if (userKey == null) return;
-      final current = stepsBox.get(userKey, defaultValue: 0) as int;
-      final merged = bgSteps > current ? bgSteps : current;
-      await stepsBox.put(userKey, merged);
-      // Clear background counter so it isn't double-added next time
-      await FlutterForegroundTask.saveData(key: 'bg_steps_$todayKey', value: 0);
-      await FlutterForegroundTask.saveData(
-        key: 'bg_baseline_$todayKey',
-        value: -1,
-      );
+  /// Re-pulls from the native service and updates the UI + Hive if it's
+  /// ahead of what we currently have. Cheap enough to call on every resume.
+  Future<void> syncFromNative() async {
+    final nativeSteps = await StepService.getStepsToday();
+    if (nativeSteps > steps.value) {
+      steps.value = nativeSteps;
+      stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
+      await saveSteps();
     }
   }
 
@@ -139,7 +112,6 @@ class StepsController extends GetxController with WidgetsBindingObserver {
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
       final userKey = "${uid}_$dateKey";
-
       final value = stepsBox.get(userKey, defaultValue: 0);
 
       tempList.add(
@@ -166,13 +138,11 @@ class StepsController extends GetxController with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     stepsBox = Hive.box('stepsBox');
-
     currentDateKey = getTodayKey();
 
     FirebaseAuth.instance.authStateChanges().listen((user) async {
       uid = user?.uid;
 
-      // ALWAYS REMOVE OLD LISTENER
       if (_stepListener != null) {
         StepService.removeListener(_stepListener!);
         _stepListener = null;
@@ -181,15 +151,9 @@ class StepsController extends GetxController with WidgetsBindingObserver {
       resetData();
 
       if (uid != null) {
-        isFirstSensorValue = true;
-
         await initTodayEntry();
-
-        await mergeBackgroundSteps(); // ADDED
         await loadTodaySteps();
-
         await loadChartDataFromHive();
-
         initSteps();
       }
     });
@@ -206,62 +170,42 @@ class StepsController extends GetxController with WidgetsBindingObserver {
 
   void initSteps() async {
     var status = await Permission.activityRecognition.request();
+    // Notification permission — without this on Android 13+, the native
+    // foreground service can run but its notification may not be shown.
+    await Permission.notification.request();
+    // Reduces the chance of stock Android killing the foreground service
+    // in the background. Note: this does NOT override OEM-specific
+    // "autostart"/battery-manager restrictions on MIUI, ColorOS, etc. —
+    // those require the user to manually allow autostart for the app in
+    // their phone's own settings; there's no public API to do this for them.
+    if (await Permission.ignoreBatteryOptimizations.isDenied) {
+      await Permission.ignoreBatteryOptimizations.request();
+    }
 
     if (status.isGranted) {
-      _stepListener = (sensorSteps) async {
-        // CHECK DATE CHANGE
+      _stepListener = (nativeSteps) async {
         final todayKey = getTodayKey();
 
         if (todayKey != currentDateKey) {
           currentDateKey = todayKey;
-
-          savedSteps = 0;
-
-          baseSensorSteps = sensorSteps;
-
           steps.value = 0;
-
           stepprogress.value = 0.0;
-
           await saveSteps();
-
           return;
         }
 
-        // FIRST SENSOR VALUE
-        if (isFirstSensorValue) {
-          baseSensorSteps = sensorSteps;
-
-          isFirstSensorValue = false;
-
-          steps.value = savedSteps;
-
-          savedSteps = steps.value;
-
-          lastSavedSteps = savedSteps;
-
+        if (nativeSteps > steps.value) {
+          steps.value = nativeSteps;
           stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
 
-          return;
+          _saveTimer?.cancel();
+          _saveTimer = Timer(const Duration(seconds: 2), () async {
+            await saveSteps();
+          });
         }
-
-        // NEW STEPS
-        int newSteps = sensorSteps - baseSensorSteps;
-
-        int calculatedSteps = savedSteps + newSteps;
-
-        steps.value = calculatedSteps;
-
-        // SAVE WITH DELAY
-        _saveTimer?.cancel();
-
-        _saveTimer = Timer(const Duration(seconds: 2), () async {
-          await saveSteps();
-        });
-
-        stepprogress.value = (calculatedSteps / stepgoal).clamp(0.0, 1.0);
       };
 
+      // Registers the listener AND ensures the native service is running.
       StepService.initSteps(_stepListener!);
 
       debugPrint('STEP SERVICE STARTED');
@@ -318,7 +262,6 @@ class StepsController extends GetxController with WidgetsBindingObserver {
       StepService.removeListener(_stepListener!);
       _stepListener = null;
     }
-
     super.onClose();
   }
 }
