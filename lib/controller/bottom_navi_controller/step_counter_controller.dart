@@ -13,6 +13,7 @@ class StepsController extends GetxController with WidgetsBindingObserver {
   RxInt steps = 0.obs;
   final RxList<foodModel> foods = <foodModel>[].obs;
   Timer? _saveTimer;
+  Timer? _dateCheckTimer;
   String? uid;
 
   @override
@@ -84,11 +85,35 @@ class StepsController extends GetxController with WidgetsBindingObserver {
   /// Re-pulls from the native service and updates the UI + Hive if it's
   /// ahead of what we currently have. Cheap enough to call on every resume.
   Future<void> syncFromNative() async {
-    final nativeSteps = await StepService.getStepsToday();
-    if (nativeSteps > steps.value) {
-      steps.value = nativeSteps;
-      stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
-      await saveSteps();
+    await syncAllStepsFromNative();
+    await loadChartDataFromHive();
+  }
+
+  /// Fetches all daily step counts stored in native SharedPreferences,
+  /// and synchronizes them to the user-specific Hive boxes.
+  Future<void> syncAllStepsFromNative() async {
+    if (uid == null) return;
+
+    final nativeHistory = await StepService.getStoredSteps();
+    if (nativeHistory.isEmpty) return;
+
+    final todayKey = getTodayKey();
+
+    for (final entry in nativeHistory.entries) {
+      final dateKey = entry.key;
+      final nativeSteps = entry.value;
+
+      final userKey = "${uid}_$dateKey";
+      final savedSteps = stepsBox.get(userKey, defaultValue: 0) as int;
+
+      if (nativeSteps > savedSteps) {
+        await stepsBox.put(userKey, nativeSteps);
+        // If it's today, keep our reactive steps state in sync as well
+        if (dateKey == todayKey) {
+          steps.value = nativeSteps;
+          stepprogress.value = (steps.value / stepgoal).clamp(0.0, 1.0);
+        }
+      }
     }
   }
 
@@ -140,6 +165,20 @@ class StepsController extends GetxController with WidgetsBindingObserver {
     stepsBox = Hive.box('stepsBox');
     currentDateKey = getTodayKey();
 
+    // Check every minute whether the date has changed while the app is running.
+    // If it has, reset the local reactive steps, save today's entry (0 steps),
+    // and reload the chart history.
+    _dateCheckTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      final todayKey = getTodayKey();
+      if (todayKey != currentDateKey) {
+        currentDateKey = todayKey;
+        steps.value = 0;
+        stepprogress.value = 0.0;
+        saveSteps();
+        loadChartDataFromHive();
+      }
+    });
+
     FirebaseAuth.instance.authStateChanges().listen((user) async {
       uid = user?.uid;
 
@@ -153,6 +192,7 @@ class StepsController extends GetxController with WidgetsBindingObserver {
       if (uid != null) {
         await initTodayEntry();
         await loadTodaySteps();
+        await syncAllStepsFromNative();
         await loadChartDataFromHive();
         initSteps();
       }
@@ -191,7 +231,6 @@ class StepsController extends GetxController with WidgetsBindingObserver {
           steps.value = 0;
           stepprogress.value = 0.0;
           await saveSteps();
-          return;
         }
 
         if (nativeSteps > steps.value) {
@@ -257,6 +296,7 @@ class StepsController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _saveTimer?.cancel();
+    _dateCheckTimer?.cancel();
     saveSteps();
     if (_stepListener != null) {
       StepService.removeListener(_stepListener!);

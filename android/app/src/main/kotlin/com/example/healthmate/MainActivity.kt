@@ -52,6 +52,26 @@ class MainActivity : FlutterActivity() {
                         result.success(prefs.getInt("steps_$today", 0))
                     }
 
+                    "getStoredSteps" -> {
+                        val safeContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            createDeviceProtectedStorageContext().also { deContext ->
+                                deContext.moveSharedPreferencesFrom(this, "step_prefs")
+                            }
+                        } else {
+                            this
+                        }
+                        val prefs = safeContext.getSharedPreferences("step_prefs", MODE_PRIVATE)
+                        val allPrefs = prefs.all
+                        val stepsMap = mutableMapOf<String, Int>()
+                        for ((key, value) in allPrefs) {
+                            if (key.startsWith("steps_") && value is Int) {
+                                val dateKey = key.substring(6)
+                                stepsMap[dateKey] = value
+                            }
+                        }
+                        result.success(stepsMap)
+                    }
+
                     "startStepService" -> {
                         val serviceIntent = Intent(this, StepCounterService::class.java)
                         ContextCompat.startForegroundService(this, serviceIntent)

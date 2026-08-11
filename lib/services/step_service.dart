@@ -58,6 +58,17 @@ class StepService {
     }
   }
 
+  /// Retrieves all daily step counts stored in native SharedPreferences.
+  static Future<Map<String, int>> getStoredSteps() async {
+    try {
+      final Map? result = await _channel.invokeMethod<Map>('getStoredSteps');
+      if (result == null) return {};
+      return result.cast<String, int>();
+    } catch (_) {
+      return {};
+    }
+  }
+
   /// Opens the manufacturer's autostart / background-activity settings
   /// screen (Xiaomi/Oppo/Vivo/Huawei have their own, separate from
   /// Android's own permission system). Wire this to a button in your
