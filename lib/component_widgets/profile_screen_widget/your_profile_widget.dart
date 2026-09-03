@@ -1,32 +1,68 @@
-// REMOVED: cloud_firestore and firebase_auth imports (no longer needed)
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // ADDED: to access ProfileController
-import 'package:healthmate/controller/bottom_navi_controller/profile_controller.dart'; // ADDED
+import 'package:get/get.dart';
+import 'package:healthmate/controller/bottom_navi_controller/profile_controller.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 
 class YourProfileWidget extends StatelessWidget {
   YourProfileWidget({super.key});
 
-  // ADDED: get the already-registered ProfileController (permanent: true in main.dart)
   final ProfileController controller = Get.find<ProfileController>();
 
-  // REMOVED: user field and getUserData() — no longer needed,
-  // ProfileController already loads this from Hive on init.
+  Widget _buildStatChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // CHANGED: wrap in Obx so it updates reactively if profile changes,
-    // instead of FutureBuilder + Firestore.
     return Obx(() {
-      return Card(
-        color: Colors.blueAccent,
-        elevation: 10,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
             children: [
               ListTile(
-                leading: CircleAvatar(
-                  radius: 25,
+                leading: const CircleAvatar(
+                  radius: 26,
                   backgroundImage: AssetImage("assets/images/profile.jpg"),
                 ),
                 title: Text(
@@ -34,54 +70,30 @@ class YourProfileWidget extends StatelessWidget {
                       ? "User"
                       : controller.name.value,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                subtitle: Text("Manage Your Health Goals"),
+                subtitle: const Text(
+                  "Manage Your Health Goals",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
-
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 20,
                 children: [
-                  Card(
-                    color: Colors.blue,
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [Text("Age: ${controller.age.value}")],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    color: Colors.blue,
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Text("Weight: ${controller.weight.value} kg"),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    color: Colors.blue,
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Text("Height: ${controller.height.value} ft"),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _buildStatChip("Age", "${controller.age.value} yrs"),
+                  const SizedBox(width: 12),
+                  _buildStatChip("Weight", "${controller.weight.value} kg"),
+                  const SizedBox(width: 12),
+                  _buildStatChip("Height", "${controller.height.value} ft"),
                 ],
               ),
-              SizedBox(height: 30),
             ],
           ),
         ),

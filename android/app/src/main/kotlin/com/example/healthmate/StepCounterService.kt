@@ -4,6 +4,7 @@ import android.app.*
 import android.content.*
 import android.hardware.*
 import android.os.*
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -34,7 +35,17 @@ class StepCounterService : Service(), SensorEventListener {
         val baseContext = applicationContext
         val safeContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val deContext = baseContext.createDeviceProtectedStorageContext()
-            deContext.moveSharedPreferencesFrom(baseContext, "step_prefs")
+            val um = baseContext.getSystemService(Context.USER_SERVICE) as UserManager
+            if (um.isUserUnlocked) {
+                try {
+                    val migrated = deContext.moveSharedPreferencesFrom(baseContext, "step_prefs")
+                    Log.d("HealthMateService", "Shared preferences migration completed: $migrated")
+                } catch (e: Exception) {
+                    Log.e("HealthMateService", "Failed to migrate shared preferences during unlock check: ${e.message}", e)
+                }
+            } else {
+                Log.d("HealthMateService", "Device is locked. Skipping shared preferences migration (will run when unlocked).")
+            }
             deContext
         } else {
             baseContext
@@ -83,20 +94,48 @@ class StepCounterService : Service(), SensorEventListener {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
-        if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(
-                NOTIF_ID,
-                buildNotification("Loading steps…"),
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
-            )
-        } else {
-            startForeground(NOTIF_ID, buildNotification("Loading steps…"))
+        Log.d("HealthMateService", "StepCounterService: onCreate() called")
+        
+        Log.d("HealthMateNotification", "StepCounterService: Creating notification channel...")
+        try {
+            createNotificationChannel()
+            Log.d("HealthMateNotification", "StepCounterService: Notification channel created successfully")
+        } catch (e: Exception) {
+            Log.e("HealthMateNotification", "StepCounterService: Failed to create notification channel: ${e.message}", e)
         }
+
+        Log.d("HealthMateNotification", "StepCounterService: Calling startForeground()...")
+        try {
+            if (Build.VERSION.SDK_INT >= 34) {
+                startForeground(
+                    NOTIF_ID,
+                    buildNotification("Loading steps…"),
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+                )
+            } else {
+                startForeground(NOTIF_ID, buildNotification("Loading steps…"))
+            }
+            Log.d("HealthMateNotification", "StepCounterService: startForeground() succeeded")
+        } catch (e: Exception) {
+            Log.e("HealthMateNotification", "StepCounterService: Failed to call startForeground(): ${e.message}", e)
+        }
+
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        if (stepSensor != null) {
+            Log.d("HealthMateService", "StepCounterService: Step counter hardware sensor is available")
+        } else {
+            Log.e("HealthMateService", "StepCounterService: Step counter hardware sensor is NOT available on this device!")
+        }
+
         midnightCheckHandler.postDelayed(midnightCheckRunnable, 60_000L)
-        scheduleRestartWorker()
+        
+        Log.d("HealthMateService", "StepCounterService: Scheduling periodic restart worker...")
+        try {
+            scheduleRestartWorker()
+        } catch (e: Exception) {
+            Log.e("HealthMateService", "StepCounterService: Failed to schedule restart worker: ${e.message}", e)
+        }
     }
 
     /**
@@ -131,10 +170,14 @@ class StepCounterService : Service(), SensorEventListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+        Log.d("HealthMateService", "StepCounterService: onStartCommand() called with action: $action, flags: $flags, startId: $startId")
+
         // Load saved values for today
         cachedDateKey = todayKey()
         baseline = prefs.getInt("baseline_$cachedDateKey", -1)
         todaySteps = prefs.getInt("steps_$cachedDateKey", 0)
+        Log.d("HealthMateService", "StepCounterService: Loaded cached steps for $cachedDateKey. Baseline: $baseline, TodaySteps: $todaySteps")
 
         // Show last known step count immediately instead of "0"
         updateNotification(todaySteps)
@@ -142,14 +185,33 @@ class StepCounterService : Service(), SensorEventListener {
 
         if (stepSensor == null) {
             // Device has no step counter hardware — nothing more to do.
+            Log.e("HealthMateService", "StepCounterService: Step sensor is null in onStartCommand. Cannot track steps.")
             updateNotification("Step sensor not available on this device")
             return START_STICKY
         }
 
-        sensorManager.unregisterListener(this)
-        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        // Check for activity recognition permission
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACTIVITY_RECOGNITION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+        Log.d("HealthMateService", "StepCounterService: ACTIVITY_RECOGNITION permission status: $hasPermission")
 
-        scheduleRestartWorker()
+        Log.d("HealthMateService", "StepCounterService: Registering sensor listener...")
+        sensorManager.unregisterListener(this)
+        val registered = sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        Log.d("HealthMateService", "StepCounterService: Sensor listener registration result: $registered")
+
+        Log.d("HealthMateService", "StepCounterService: Scheduling periodic restart worker...")
+        try {
+            scheduleRestartWorker()
+        } catch (e: Exception) {
+            Log.e("HealthMateService", "StepCounterService: Failed to schedule restart worker: ${e.message}", e)
+        }
 
         return START_STICKY // ask the OS to restart this service if it's killed
     }
@@ -159,8 +221,11 @@ class StepCounterService : Service(), SensorEventListener {
         val rawSteps = event.values[0].toInt()
         val todayKey = todayKey()
 
+        Log.d("HealthMateService", "StepCounterService: onSensorChanged() - rawSteps: $rawSteps")
+
         // Midnight rollover
         if (todayKey != cachedDateKey) {
+            Log.d("HealthMateService", "StepCounterService: Date rollover detected. Old: $cachedDateKey, New: $todayKey")
             cachedDateKey = todayKey
             baseline = -1
             todaySteps = 0
@@ -170,12 +235,14 @@ class StepCounterService : Service(), SensorEventListener {
             // First reading today, or first reading ever after this
             // service (re)started — preserve whatever was already counted.
             baseline = rawSteps - todaySteps
+            Log.d("HealthMateService", "StepCounterService: Set new baseline: $baseline (rawSteps: $rawSteps, todaySteps: $todaySteps)")
             prefs.edit().putInt("baseline_$todayKey", baseline).apply()
         } else if (rawSteps < todaySteps + baseline) {
             // Sensor counter reset (device rebooted mid-day) — recompute
             // baseline so todaySteps continues from where it left off
             // instead of dropping to 0.
             baseline = rawSteps - todaySteps
+            Log.d("HealthMateService", "StepCounterService: Sensor reset detected. Recomputed baseline: $baseline (rawSteps: $rawSteps, todaySteps: $todaySteps)")
             prefs.edit().putInt("baseline_$todayKey", baseline).apply()
         }
 
@@ -183,6 +250,8 @@ class StepCounterService : Service(), SensorEventListener {
         if (todaySteps < 0) todaySteps = 0
 
         prefs.edit().putInt("steps_$todayKey", todaySteps).apply()
+
+        Log.d("HealthMateService", "StepCounterService: Today's Steps: $todaySteps")
 
         updateNotification(todaySteps)
         sendStepsToFlutter(todaySteps)

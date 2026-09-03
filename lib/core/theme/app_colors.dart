@@ -5,71 +5,61 @@ class AppColors {
   static const Color primary = Color(0xFF6C63FF); // violet-purple
   static const Color primaryLight = Color(0xFF857DFF); // lighter violet
   static const Color primarySoft = Color(0xFFA59EFF); // soft violet
-  static const Color primarySurface = Color(0xFFEEEDFF); // lavender tint
+  static const Color primarySurface = Color(0xFFF3F4F6); // neutral light surface
 
   // ── Semantic / metric colors ───────────────────────────────────────────────
-  static const Color steps = Color(
-    0xFF6C63FF,
-  ); // violet  – steps (matches dashboard card)
-  static const Color calories = Color(
-    0xFFFF6B35,
-  ); // orange  – calories (matches nutrition card + meal kcal)
-  static const Color water = Color(0xFF4CC9F0); // sky blue – hydration
-  static const Color protein = Color(0xFF06D6A0); // teal    – protein/nutrition
+  static const Color steps = Color(0xFF10B981); // Emerald Green
+  static const Color calories = Color(0xFFEF4444); // Red / Coral
+  static const Color water = Color(0xFF3B82F6); // Blue
+  static const Color protein = Color(0xFF8B5CF6); // Purple
+  
+  // ── Meal specific colors ──────────────────────────────────────────────────
+  static const Color breakfast = Color(0xFFF59E0B); // Warm Amber
+  static const Color lunch = Color(0xFF0EA5E9); // Sky Blue
+  static const Color dinner = Color(0xFF6366F1); // Indigo
 
-  // ── Progress track tints ───────────────────────────────────────────────────
-  static const Color stepsTrack = Color(0xFFEEEDFF); // violet tint
-  static const Color caloriesTrack = Color(0xFFFFEDE6); // orange tint
-  static const Color waterTrack = Color(0xFFE6F7FD); // sky tint
-  static const Color proteinTrack = Color(0xFFE6FBF5); // teal tint
+  // ── Progress track tints (8% opacity equivalents of semantic colors) ───────
+  static const Color stepsTrack = Color(0xFFECFDF5);
+  static const Color caloriesTrack = Color(0xFFFEF2F2);
+  static const Color waterTrack = Color(0xFFEFF6FF);
+  static const Color proteinTrack = Color(0xFFF5F3FF);
 
   // ── Neutrals ───────────────────────────────────────────────────────────────
-  static const Color background = Color(
-    0xFFF8F8FF,
-  ); // near-white with violet hint
-  static const Color surface = Color(0xFFEEEDFF); // card surface / border
-  static const Color textPrimary = Color(0xFF1A1A2E); // dark navy text
+  static const Color background = Color(0xFFF9FAFB); // sleek light background
+  static const Color surface = Colors.white; // card surface
+  static const Color border = Color(0xFFE5E7EB); // subtle 1px border color
+  static const Color textPrimary = Color(0xFF111827); // dark text
   static const Color textSecondary = Color(0xFF6B7280); // muted grey text
 
-  // ── Screen gradients ───────────────────────────────────────────────────────
-  // Dashboard "Welcome Back" header — purple (matches image 1)
+  // ── Screen gradients (subtle transitions) ──────────────────────────────────
   static const LinearGradient screenGradient = LinearGradient(
-    colors: [Color(0xFF6C63FF), Color(0xFFBB86FC)],
+    colors: [Color(0xFF6C63FF), Color(0xFF5A52E5)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Food Logger header — green (matches image 3)
   static const LinearGradient foodGradient = LinearGradient(
-    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    colors: [Color(0xFFF9FAFB), Color(0xFFF9FAFB)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Steps screen header — purple (matches image 2)
   static const LinearGradient stepsGradient = LinearGradient(
-    colors: [Color(0xFF6C63FF), Color(0xFFBB86FC)],
+    colors: [Color(0xFFF9FAFB), Color(0xFFF9FAFB)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFF6C63FF), Color(0xFF857DFF)],
+    colors: [Color(0xFF6C63FF), Color(0xFF5A52E5)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // ── Specific card colors (matching screenshots exactly) ────────────────────
-  static const Color weeklySummaryBg = Color(
-    0xFF6C63FF,
-  ); // purple weekly summary
-  static const Color nutritionCardBg = Color(
-    0xFFFF6B35,
-  ); // orange nutrition card (image 3)
-  static const Color monthlyCardBg = Color(
-    0xFF6C63FF,
-  ); // purple "Total This Month" (image 2)
-  static const Color dailyAvgCardBg = Color(
-    0xFFFF6B35,
-  ); // orange "Daily Average"   (image 2)
+  // ── Specific card colors (mapped to semantic design tokens) ────────────────
+  static const Color weeklySummaryBg = Colors.white;
+  static const Color nutritionCardBg = Colors.white;
+  static const Color monthlyCardBg = Colors.white;
+  static const Color dailyAvgCardBg = Colors.white;
 }
+

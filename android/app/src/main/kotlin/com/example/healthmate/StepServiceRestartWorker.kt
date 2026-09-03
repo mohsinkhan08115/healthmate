@@ -2,6 +2,7 @@ package com.example.healthmate
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -29,8 +30,14 @@ class StepServiceRestartWorker(context: Context, params: WorkerParameters) :
     Worker(context, params) {
 
     override fun doWork(): Result {
-        val serviceIntent = Intent(applicationContext, StepCounterService::class.java)
-        ContextCompat.startForegroundService(applicationContext, serviceIntent)
+        Log.d("HealthMateService", "StepServiceRestartWorker: Running worker to restart service...")
+        try {
+            val serviceIntent = Intent(applicationContext, StepCounterService::class.java)
+            ContextCompat.startForegroundService(applicationContext, serviceIntent)
+            Log.d("HealthMateService", "StepServiceRestartWorker: service start requested successfully.")
+        } catch (e: Exception) {
+            Log.e("HealthMateService", "StepServiceRestartWorker: Failed to start service: ${e.message}", e)
+        }
         return Result.success()
     }
 }

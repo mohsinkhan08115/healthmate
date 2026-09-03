@@ -84,7 +84,8 @@ class StepService {
 
   static Future<bool> needsAutoStartSettings() async {
     try {
-      return await _channel.invokeMethod<bool>('needsAutoStartSettings') ?? false;
+      return await _channel.invokeMethod<bool>('needsAutoStartSettings') ??
+          false;
     } catch (_) {
       return false;
     }

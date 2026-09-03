@@ -161,93 +161,167 @@ class HomeScreen extends StatelessWidget {
     });
     return Obx(
       () => Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: Colors.white,
+          elevation: 0,
           automaticallyImplyLeading: false,
-          title: ListTile(
-            contentPadding: EdgeInsets.zero,
-
-            leading: SizedBox(
-              height: 30,
-              width: 30,
-              child: Image.asset("assets/images/lifeline.png"),
-            ),
-
-            title: ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color.fromARGB(255, 214, 242, 3),
-                  Color.fromARGB(255, 5, 237, 5),
-                ],
-              ).createShader(bounds),
-
-              // Changed: read name directly from Hive instead of FutureBuilder + Firestore
-              child: Text(
-                "Hello, ${_profileBox.get('name') ?? 'User'}",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+          titleSpacing: 16,
+          title: Row(
+            children: [
+              Container(
+                height: 36,
+                width: 36,
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset(
+                  "assets/images/lifeline.png",
+                  fit: BoxFit.contain,
                 ),
               ),
-            ),
-
-            subtitle: Text(
-              "Your Health Companion",
-              style: TextStyle(fontSize: 14, color: Colors.black),
-            ),
-
-            trailing: Column(
-              children: [
-                Text(
-                  "Today",
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Hello, ${_profileBox.get('name') ?? 'User'}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Text(
+                      "Your Health Companion",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-
-                Text(
-                  "${currentDate.day}/${currentDate.month}/${currentDate.year}",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ],
-            ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Today",
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "${currentDate.day}/${currentDate.month}/${currentDate.year}",
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          shape: const Border(
+            bottom: BorderSide(color: AppColors.border, width: 1),
           ),
         ),
 
         body: _pages[controller.selectedIndex.value],
 
-        bottomNavigationBar: BottomNavigationBar(
-          fixedColor: Colors.blue,
-          unselectedItemColor: Colors.amber,
-
-          currentIndex: controller.selectedIndex.value,
-
-          onTap: controller.changeIndex,
-
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_rounded),
-              label: "Dashboard",
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: AppColors.border, width: 1),
             ),
-
-            BottomNavigationBarItem(
-              icon: Icon(Icons.directions_walk_rounded),
-              label: "Steps",
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textSecondary,
+            currentIndex: controller.selectedIndex.value,
+            onTap: controller.changeIndex,
+            selectedLabelStyle: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
-
-            BottomNavigationBarItem(
-              icon: Icon(Icons.restaurant_rounded),
-              label: "Food",
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.normal,
             ),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.dashboard_outlined),
+                ),
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.dashboard_rounded),
+                ),
+                label: "Dashboard",
+              ),
 
-            BottomNavigationBarItem(
-              icon: Icon(Icons.lunch_dining_rounded),
-              label: "Meals",
-            ),
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.directions_walk_outlined),
+                ),
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.directions_walk_rounded),
+                ),
+                label: "Steps",
+              ),
 
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-          ],
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.restaurant_outlined),
+                ),
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.restaurant_rounded),
+                ),
+                label: "Food",
+              ),
+
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.lunch_dining_outlined),
+                ),
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.lunch_dining_rounded),
+                ),
+                label: "Meals",
+              ),
+
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.person_outline),
+                ),
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 4),
+                  child: Icon(Icons.person),
+                ),
+                label: "Profile",
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
 import 'package:healthmate/models/food_model.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 
 class AddFoodImage extends StatefulWidget {
   const AddFoodImage({super.key});
@@ -197,7 +198,7 @@ All values must be numbers. Use 0 if unknown.
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: SingleChildScrollView(
             controller: scrollController,
             child: Column(
@@ -205,11 +206,11 @@ All values must be numbers. Use 0 if unknown.
               children: [
                 Center(
                   child: Container(
-                    width: 40,
+                    width: 36,
                     height: 4,
-                    margin: const EdgeInsets.only(bottom: 12),
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: AppColors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -217,53 +218,87 @@ All values must be numbers. Use 0 if unknown.
 
                 const Text(
                   'Scan Food',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 _buildImagePreview(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 if (!_loading && !_readyToSave) ...[
-                  _PickButton(
-                    icon: Icons.camera_alt,
-                    label: 'Take Photo',
-                    color: Colors.deepOrangeAccent,
-                    onTap: () => _pickImage(ImageSource.camera),
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      icon: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
+                      label: const Text(
+                        'Take Photo',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  _PickButton(
-                    icon: Icons.photo_library,
-                    label: 'Choose from Gallery',
-                    color: Colors.blueAccent,
-                    onTap: () => _pickImage(ImageSource.gallery),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                      icon: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 18),
+                      label: const Text(
+                        'Choose from Gallery',
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
 
                 if (_loading) ...[
-                  const SizedBox(height: 20),
-                  const Center(child: CircularProgressIndicator()),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 32),
+                  const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   const Text(
                     'Recognising food…',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
 
                 if (_errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange.shade200),
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade100),
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(color: Colors.orange.shade800),
+                      style: TextStyle(color: Colors.red.shade800, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -272,40 +307,59 @@ All values must be numbers. Use 0 if unknown.
                 if (_readyToSave) ...[
                   const SizedBox(height: 16),
                   _buildEditableFields(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _readyToSave = false;
-                              _image = null;
-                              _errorMessage = null;
-                              _foodName = 'Unknown Food';
-                              _calories = 0;
-                              _protein = 0;
-                              _carbs = 0;
-                              _fat = 0;
-                              _fiber = 0;
-                            });
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Rescan'),
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _readyToSave = false;
+                                _image = null;
+                                _errorMessage = null;
+                                _foodName = 'Unknown Food';
+                                _calories = 0;
+                                _protein = 0;
+                                _carbs = 0;
+                                _fat = 0;
+                                _fiber = 0;
+                              });
+                            },
+                            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 18),
+                            label: const Text(
+                              'Rescan',
+                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _saveFood,
-                          icon: const Icon(Icons.check, color: Colors.white),
-                          label: const Text(
-                            'Add to Log',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: _saveFood,
+                            icon: const Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Add to Log',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.steps, // Green save button
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -324,12 +378,9 @@ All values must be numbers. Use 0 if unknown.
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.deepOrangeAccent, Color(0xFFFF3D00)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,35 +388,61 @@ All values must be numbers. Use 0 if unknown.
           Text(
             _foodName,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
+              color: AppColors.textPrimary,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
-              _MacroChip(label: 'Calories', value: '${_calories.toInt()} kcal'),
+              Expanded(
+                child: _MacroChip(
+                  label: 'Calories',
+                  value: '${_calories.toInt()} kcal',
+                  color: AppColors.calories,
+                  trackColor: AppColors.caloriesTrack,
+                ),
+              ),
               const SizedBox(width: 8),
-              _MacroChip(
-                label: 'Protein',
-                value: '${_protein.toStringAsFixed(1)}g',
+              Expanded(
+                child: _MacroChip(
+                  label: 'Protein',
+                  value: '${_protein.toStringAsFixed(1)}g',
+                  color: AppColors.protein,
+                  trackColor: AppColors.proteinTrack,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _MacroChip(
-                label: 'Carbs',
-                value: '${_carbs.toStringAsFixed(1)}g',
+              Expanded(
+                child: _MacroChip(
+                  label: 'Carbs',
+                  value: '${_carbs.toStringAsFixed(1)}g',
+                  color: AppColors.water,
+                  trackColor: AppColors.waterTrack,
+                ),
               ),
               const SizedBox(width: 8),
-              _MacroChip(label: 'Fat', value: '${_fat.toStringAsFixed(1)}g'),
+              Expanded(
+                child: _MacroChip(
+                  label: 'Fat',
+                  value: '${_fat.toStringAsFixed(1)}g',
+                  color: AppColors.breakfast,
+                  trackColor: AppColors.stepsTrack,
+                ),
+              ),
               const SizedBox(width: 8),
-              _MacroChip(
-                label: 'Fiber',
-                value: '${_fiber.toStringAsFixed(1)}g',
+              Expanded(
+                child: _MacroChip(
+                  label: 'Fiber',
+                  value: '${_fiber.toStringAsFixed(1)}g',
+                  color: AppColors.textSecondary,
+                  trackColor: AppColors.primarySurface,
+                ),
               ),
             ],
           ),
@@ -379,19 +456,19 @@ All values must be numbers. Use 0 if unknown.
       return Container(
         height: 180,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.primarySurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: AppColors.border),
         ),
         child: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.camera_alt_outlined, size: 48, color: Colors.grey),
+              Icon(Icons.camera_alt_outlined, size: 40, color: AppColors.textSecondary),
               SizedBox(height: 8),
               Text(
                 'Take or choose a photo of your meal',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
             ],
           ),
@@ -400,35 +477,7 @@ All values must be numbers. Use 0 if unknown.
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.file(_image!, height: 180, fit: BoxFit.cover),
-    );
-  }
-}
-
-class _PickButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _PickButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, color: Colors.white),
-      label: Text(label, style: const TextStyle(color: Colors.white)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+      child: Image.file(_image!, height: 180, width: double.infinity, fit: BoxFit.cover),
     );
   }
 }
@@ -436,33 +485,42 @@ class _PickButton extends StatelessWidget {
 class _MacroChip extends StatelessWidget {
   final String label;
   final String value;
+  final Color color;
+  final Color trackColor;
 
-  const _MacroChip({required this.label, required this.value});
+  const _MacroChip({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.trackColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
+        color: trackColor,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: color,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
           ),
         ],
       ),
     );
   }
 }
+
