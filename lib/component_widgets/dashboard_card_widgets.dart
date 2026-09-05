@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:healthmate/component_widgets/circular_progress_indicator.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 
 class CardWidgets extends StatelessWidget {
+  final String text;
+  final String value;
+  final IconData icon;
+  final double progressValue;
+  final String goalText;
+
   const CardWidgets({
     super.key,
     required this.text,
@@ -11,109 +19,133 @@ class CardWidgets extends StatelessWidget {
     required this.goalText,
   });
 
-  final IconData icon;
-  final String text;
-  final String value;
-  final double progressValue;
-  final String goalText;
-
   @override
   Widget build(BuildContext context) {
-    Color metricColor = AppColors.primary;
-    Color trackColor = AppColors.primarySurface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
+    final baseRingColor = isDark ? AppColors.darkRingTrack : AppColors.lightRingTrack;
 
+    // Map Category Accent Colors per spec
+    Color accentColor = AppColors.steps;
     final lowerText = text.toLowerCase();
     if (lowerText.contains("step")) {
-      metricColor = AppColors.steps;
-      trackColor = AppColors.stepsTrack;
+      accentColor = AppColors.steps; // Purple #8B5CF6
     } else if (lowerText.contains("cal")) {
-      metricColor = AppColors.calories;
-      trackColor = AppColors.caloriesTrack;
+      accentColor = AppColors.calories; // Orange #FF6B4A
     } else if (lowerText.contains("water")) {
-      metricColor = AppColors.water;
-      trackColor = AppColors.waterTrack;
+      accentColor = AppColors.water; // Blue #00B4D8
     } else if (lowerText.contains("prot")) {
-      metricColor = AppColors.protein;
-      trackColor = AppColors.proteinTrack;
+      accentColor = AppColors.protein; // Gold #F59E0B
     }
 
     return Container(
+      padding: const EdgeInsets.all(14.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder,
+          width: 1,
+        ),
+        boxShadow: AppTheme.cardShadow(context),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // ── Header Row: Small category icon + title ────────────────────────
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                height: 36,
-                width: 36,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: trackColor,
+                  color: accentColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: metricColor, size: 18),
+                child: Icon(
+                  icon,
+                  size: 16,
+                  color: accentColor,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   text,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
                   ),
-                  textAlign: TextAlign.end,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const Spacer(),
-          Text(
-            value.split(' ')[0], // Get just the number/main statistic
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+
+          // ── Middle Row: Circular Progress Indicator + Numerical Value/Target ──
+          Row(
+            children: [
+              CustomCircularProgressIndicator(
+                progress: progressValue,
+                size: 48,
+                strokeWidth: 4.5,
+                activeColor: accentColor,
+                baseColor: baseRingColor,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: textPrimary,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "/ $goalText",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+
+          // ── Bottom: Thin matching linear bar ─────────────────────────────
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(99),
             child: LinearProgressIndicator(
-              value: progressValue,
-              backgroundColor: trackColor,
-              valueColor: AlwaysStoppedAnimation<Color>(metricColor),
-              minHeight: 4,
+              value: progressValue.clamp(0.0, 1.0),
+              backgroundColor: accentColor.withOpacity(0.12),
+              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+              minHeight: 3.5,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Goal: $goalText",
-            style: const TextStyle(
-              fontSize: 10,
-              color: AppColors.textSecondary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 }
-

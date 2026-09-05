@@ -106,19 +106,19 @@ All values must be numbers. Use 0 if unknown.
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        print('FULL RESPONSE: ${response.body}');
+        debugPrint('FULL RESPONSE: ${response.body}');
 
         final rawText =
             data['candidates'][0]['content']['parts'][0]['text'] as String;
 
-        print('RAW TEXT: $rawText');
+        debugPrint('RAW TEXT: $rawText');
 
         final cleaned = rawText
             .replaceAll(RegExp(r'```json\s*'), '')
             .replaceAll(RegExp(r'```\s*'), '')
             .trim();
 
-        print('CLEANED: $cleaned');
+        debugPrint('CLEANED: $cleaned');
 
         final nutrition = jsonDecode(cleaned) as Map<String, dynamic>;
 
@@ -134,8 +134,8 @@ All values must be numbers. Use 0 if unknown.
           _readyToSave = true;
         });
       } else {
-        print('=== GEMINI ERROR ${response.statusCode} ===');
-        print(response.body);
+        debugPrint('=== GEMINI ERROR ${response.statusCode} ===');
+        debugPrint(response.body);
 
         String detail = response.body;
         try {
@@ -173,6 +173,7 @@ All values must be numbers. Use 0 if unknown.
     _controller.addFood(food);
     await Future.delayed(const Duration(milliseconds: 100));
 
+    if (!mounted) return;
     final messengerState = ScaffoldMessenger.of(context);
 
     Navigator.pop(context);
@@ -180,13 +181,23 @@ All values must be numbers. Use 0 if unknown.
     messengerState.showSnackBar(
       SnackBar(
         content: Text('${food.name} added successfully!'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.primary,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final textPrimary =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary =
+        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final dragHandleColor =
+        isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.85,
@@ -194,9 +205,9 @@ All values must be numbers. Use 0 if unknown.
       minChildSize: 0.5,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: SingleChildScrollView(
@@ -210,24 +221,24 @@ All values must be numbers. Use 0 if unknown.
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.border,
+                      color: dragHandleColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
 
-                const Text(
+                Text(
                   'Scan Food',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
 
-                _buildImagePreview(),
+                _buildImagePreview(context),
                 const SizedBox(height: 20),
 
                 if (!_loading && !_readyToSave) ...[
@@ -235,10 +246,12 @@ All values must be numbers. Use 0 if unknown.
                     height: 48,
                     child: ElevatedButton.icon(
                       onPressed: () => _pickImage(ImageSource.camera),
-                      icon: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
+                      icon: const Icon(Icons.camera_alt_rounded,
+                          color: Colors.white, size: 18),
                       label: const Text(
                         'Take Photo',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -254,13 +267,17 @@ All values must be numbers. Use 0 if unknown.
                     height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.gallery),
-                      icon: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 18),
+                      icon: const Icon(Icons.photo_library_rounded,
+                          color: AppColors.primary, size: 18),
                       label: const Text(
                         'Choose from Gallery',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        side: const BorderSide(
+                            color: AppColors.primary, width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -277,11 +294,11 @@ All values must be numbers. Use 0 if unknown.
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Recognising food…',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -292,13 +309,13 @@ All values must be numbers. Use 0 if unknown.
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade100),
+                      border: Border.all(color: isDark ? Colors.red.shade700 : Colors.red.shade100),
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(color: Colors.red.shade800, fontSize: 13),
+                      style: TextStyle(color: isDark ? Colors.red.shade200 : Colors.red.shade800, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -306,7 +323,7 @@ All values must be numbers. Use 0 if unknown.
 
                 if (_readyToSave) ...[
                   const SizedBox(height: 16),
-                  _buildEditableFields(),
+                  _buildEditableFields(context),
                   const SizedBox(height: 24),
                   Row(
                     children: [
@@ -327,13 +344,17 @@ All values must be numbers. Use 0 if unknown.
                                 _fiber = 0;
                               });
                             },
-                            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 18),
+                            icon: const Icon(Icons.refresh_rounded,
+                                color: AppColors.primary, size: 18),
                             label: const Text(
                               'Rescan',
-                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              side: const BorderSide(
+                                  color: AppColors.primary, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -347,13 +368,16 @@ All values must be numbers. Use 0 if unknown.
                           height: 48,
                           child: ElevatedButton.icon(
                             onPressed: _saveFood,
-                            icon: const Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                            icon: const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 18),
                             label: const Text(
                               'Add to Log',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.steps, // Green save button
+                              backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
@@ -374,21 +398,26 @@ All values must be numbers. Use 0 if unknown.
     );
   }
 
-  Widget _buildEditableFields() {
+  Widget _buildEditableFields(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.darkBackground : AppColors.lightSurface;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final borderColor = isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _foodName,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -440,7 +469,7 @@ All values must be numbers. Use 0 if unknown.
                 child: _MacroChip(
                   label: 'Fiber',
                   value: '${_fiber.toStringAsFixed(1)}g',
-                  color: AppColors.textSecondary,
+                  color: AppColors.emerald,
                   trackColor: AppColors.primarySurface,
                 ),
               ),
@@ -451,24 +480,29 @@ All values must be numbers. Use 0 if unknown.
     );
   }
 
-  Widget _buildImagePreview() {
+  Widget _buildImagePreview(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final previewBg = isDark ? AppColors.darkBackground : AppColors.primarySurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     if (_image == null) {
       return Container(
         height: 180,
         decoration: BoxDecoration(
-          color: AppColors.primarySurface,
+          color: previewBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: borderColor),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.camera_alt_outlined, size: 40, color: AppColors.textSecondary),
-              SizedBox(height: 8),
+              Icon(Icons.camera_alt_outlined, size: 40, color: textSecondary),
+              const SizedBox(height: 8),
               Text(
                 'Take or choose a photo of your meal',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: textSecondary, fontSize: 13),
               ),
             ],
           ),
@@ -497,10 +531,14 @@ class _MacroChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveTrackBg = isDark ? trackColor.withOpacity(0.2) : trackColor;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: trackColor,
+        color: effectiveTrackBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -516,11 +554,10 @@ class _MacroChip extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+            style: TextStyle(color: textSecondary, fontSize: 10),
           ),
         ],
       ),
     );
   }
 }
-

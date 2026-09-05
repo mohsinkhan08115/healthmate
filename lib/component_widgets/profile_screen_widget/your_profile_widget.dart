@@ -2,36 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/profile_controller.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 
 class YourProfileWidget extends StatelessWidget {
   YourProfileWidget({super.key});
 
   final ProfileController controller = Get.find<ProfileController>();
 
-  Widget _buildStatChip(String label, String value) {
+  Widget _buildStatChip(BuildContext context, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? AppColors.darkBackground : AppColors.background;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: chipBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.textSecondary,
+              color: textSecondary,
             ),
           ),
         ],
@@ -41,21 +48,21 @@ class YourProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Obx(() {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.01),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: borderColor, width: 1),
+            boxShadow: AppTheme.cardShadow(context),
           ),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
@@ -69,17 +76,17 @@ class YourProfileWidget extends StatelessWidget {
                   controller.name.value.isEmpty
                       ? "User"
                       : controller.name.value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle: Text(
                   "Manage Your Health Goals",
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: textSecondary,
                   ),
                 ),
               ),
@@ -87,11 +94,11 @@ class YourProfileWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildStatChip("Age", "${controller.age.value} yrs"),
+                  _buildStatChip(context, "Age", "${controller.age.value} yrs"),
                   const SizedBox(width: 12),
-                  _buildStatChip("Weight", "${controller.weight.value} kg"),
+                  _buildStatChip(context, "Weight", "${controller.weight.value} kg"),
                   const SizedBox(width: 12),
-                  _buildStatChip("Height", "${controller.height.value} ft"),
+                  _buildStatChip(context, "Height", "${controller.height.value} ft"),
                 ],
               ),
             ],

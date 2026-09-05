@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/screens/auth_screens/main_auth_screen.dart';
 
-// ─────────────────────────────────────────────
-//  COLORS
-// ─────────────────────────────────────────────
-const Color _bgStart = Color(0xFF4A90E2);
-const Color _bgEnd = Color(0xFF5B5CE8);
-const Color _titleColor = Color(0xFF1A1A2E);
-const Color _subtitleColor = Color(0xFF9CA3AF);
-const Color _bodyColor = Color(0xFF4B5563);
-const Color _chipBg = Color(0xFFF3F4F6);
-const Color _accentBlue = Color(0xFF3B9EE8);
-const Color accentPurple = Color(0xFF7C5CE4);
+const Color _bgStart = Color(0xFF22D3EE);
+const Color _bgEnd = Color(0xFF0891B2);
+const Color _accentBlue = Color(0xFF22D3EE);
 
-// ─────────────────────────────────────────────
-//  SCREEN
-// ─────────────────────────────────────────────
 class WaterIntakeScreen extends StatelessWidget {
   const WaterIntakeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.darkSurface : Colors.white;
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+    final subtitleColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF9CA3AF);
+    final bodyColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF4B5563);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -37,12 +33,12 @@ class WaterIntakeScreen extends StatelessWidget {
               const _ProgressDots(activeIndex: 2),
               const SizedBox(height: 8),
 
-              // ── White card ──
+              // ── Card Container ──
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: SingleChildScrollView(
@@ -51,33 +47,32 @@ class WaterIntakeScreen extends StatelessWidget {
                       children: [
                         // Water drop emoji
                         const Text('💧', style: TextStyle(fontSize: 80)),
-                        // const SizedBox(height: 2),
 
                         // Title
-                        const Text(
+                        Text(
                           'Water Intake',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: _titleColor,
+                            color: titleColor,
                           ),
                         ),
                         const SizedBox(height: 3),
 
                         // Subtitle
-                        const Text(
+                        Text(
                           'Stay hydrated throughout the day',
-                          style: TextStyle(fontSize: 14, color: _subtitleColor),
+                          style: TextStyle(fontSize: 14, color: subtitleColor),
                         ),
                         const SizedBox(height: 10),
 
                         // Body text
-                        const Text(
+                        Text(
                           'Track your daily water consumption with easy logging. Get reminders to drink water and hit your hydration goals!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: _bodyColor,
+                            color: bodyColor,
                             height: 1.6,
                           ),
                         ),
@@ -105,11 +100,11 @@ class WaterIntakeScreen extends StatelessWidget {
                         const SizedBox(height: 8),
 
                         // Step indicator
-                        const Text(
+                        Text(
                           '3 of 3',
                           style: TextStyle(
                             fontSize: 13,
-                            color: _subtitleColor,
+                            color: subtitleColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -127,9 +122,6 @@ class WaterIntakeScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  PROGRESS DOTS
-// ─────────────────────────────────────────────
 class _ProgressDots extends StatelessWidget {
   final int activeIndex;
   const _ProgressDots({required this.activeIndex});
@@ -154,9 +146,6 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FEATURE ROW
-// ─────────────────────────────────────────────
 class _FeatureRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -170,11 +159,15 @@ class _FeatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFF3F4F6);
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
-        color: _chipBg,
+        color: chipBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -191,10 +184,10 @@ class _FeatureRow extends StatelessWidget {
           const SizedBox(width: 16),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: _titleColor,
+              color: titleColor,
             ),
           ),
         ],
@@ -203,9 +196,6 @@ class _FeatureRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  EXAMPLE STATS CARD
-// ─────────────────────────────────────────────
 class _ExampleStatsCard extends StatelessWidget {
   const _ExampleStatsCard();
 
@@ -218,14 +208,14 @@ class _ExampleStatsCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF3BBCE8), Color(0xFF5B5CE8)],
+          colors: [Color(0xFF22D3EE), Color(0xFF0891B2)],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Example Stats',
             style: TextStyle(
               fontSize: 14,
@@ -233,8 +223,8 @@ class _ExampleStatsCard extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
-          const Row(
+          SizedBox(height: 16),
+          Row(
             children: [
               Expanded(
                 child: _StatCell(value: '6', unit: 'glasses', period: 'Today'),
@@ -259,9 +249,6 @@ class _ExampleStatsCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  STAT CELL
-// ─────────────────────────────────────────────
 class _StatCell extends StatelessWidget {
   final String value;
   final String unit;
@@ -317,9 +304,6 @@ class _StatCell extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  GET STARTED BUTTON
-// ─────────────────────────────────────────────
 class _GetStartedButton extends StatelessWidget {
   const _GetStartedButton();
 
@@ -329,7 +313,7 @@ class _GetStartedButton extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MainAuthScreen()),
+          MaterialPageRoute(builder: (context) => const MainAuthScreen()),
         );
       },
       child: Container(
@@ -337,7 +321,7 @@ class _GetStartedButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF3BBCE8), Color(0xFF5B5CE8)],
+            colors: [Color(0xFF10B981), Color(0xFF059669)],
           ),
           borderRadius: BorderRadius.circular(18),
         ),

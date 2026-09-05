@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/onboarding_screen/water_onboarding_screen.dart';
+import 'package:healthmate/screens/auth_screens/main_auth_screen.dart';
 
-// ─────────────────────────────────────────────
-//  COLORS
-// ─────────────────────────────────────────────
-const Color _bgStart = Color(0xFFFF6B35);
-const Color _bgEnd = Color(0xFFE8105A);
-const Color _titleColor = Color(0xFF1A1A2E);
-const Color _subtitleColor = Color(0xFF9CA3AF);
-const Color _bodyColor = Color(0xFF4B5563);
-const Color _chipBg = Color(0xFFF3F4F6);
-const Color _accentOrange = Color(0xFFFF6B35);
-const Color _accentRed = Color(0xFFE8105A);
+const Color _bgStart = Color(0xFF6C5CE7);
+const Color _bgEnd = Color(0xFF4834D4);
+const Color _accentOrange = Color(0xFFF59E0B);
+const Color _accentRed = Color(0xFFEF6B6B);
 
-// ─────────────────────────────────────────────
-//  SCREEN
-// ─────────────────────────────────────────────
 class NutritionTrackingScreen extends StatelessWidget {
   const NutritionTrackingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.darkSurface : Colors.white;
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+    final subtitleColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF9CA3AF);
+    final bodyColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF4B5563);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -37,12 +35,12 @@ class NutritionTrackingScreen extends StatelessWidget {
               const _ProgressDots(activeIndex: 1),
               const SizedBox(height: 10),
 
-              // ── White card ──
+              // ── Card Container ──
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: SingleChildScrollView(
@@ -54,30 +52,30 @@ class NutritionTrackingScreen extends StatelessWidget {
                         const SizedBox(height: 5),
 
                         // Title
-                        const Text(
+                        Text(
                           'Nutrition Tracking',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: _titleColor,
+                            color: titleColor,
                           ),
                         ),
                         const SizedBox(height: 5),
 
                         // Subtitle
-                        const Text(
+                        Text(
                           'Log your meals and monitor macros',
-                          style: TextStyle(fontSize: 14, color: _subtitleColor),
+                          style: TextStyle(fontSize: 14, color: subtitleColor),
                         ),
                         const SizedBox(height: 8),
 
                         // Body
-                        const Text(
+                        Text(
                           'Track your daily calories, protein, carbs, and fats. Get detailed nutrition info for every meal you eat!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: _bodyColor,
+                            color: bodyColor,
                             height: 1.6,
                           ),
                         ),
@@ -107,11 +105,11 @@ class NutritionTrackingScreen extends StatelessWidget {
                         const SizedBox(height: 8),
 
                         // Step indicator
-                        const Text(
+                        Text(
                           '2 of 3',
                           style: TextStyle(
                             fontSize: 13,
-                            color: _subtitleColor,
+                            color: subtitleColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -129,9 +127,6 @@ class NutritionTrackingScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  PROGRESS DOTS
-// ─────────────────────────────────────────────
 class _ProgressDots extends StatelessWidget {
   final int activeIndex;
   const _ProgressDots({required this.activeIndex});
@@ -156,9 +151,6 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FEATURE ROW
-// ─────────────────────────────────────────────
 class _FeatureRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -172,11 +164,15 @@ class _FeatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFF3F4F6);
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
-        color: _chipBg,
+        color: chipBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -193,10 +189,10 @@ class _FeatureRow extends StatelessWidget {
           const SizedBox(width: 16),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: _titleColor,
+              color: titleColor,
             ),
           ),
         ],
@@ -205,9 +201,6 @@ class _FeatureRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  EXAMPLE STATS CARD
-// ─────────────────────────────────────────────
 class _ExampleStatsCard extends StatelessWidget {
   const _ExampleStatsCard();
 
@@ -220,14 +213,14 @@ class _ExampleStatsCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFF6B35), Color(0xFFE8105A)],
+          colors: [Color(0xFF6C5CE7), Color(0xFF4834D4)],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Example Stats',
             style: TextStyle(
               fontSize: 14,
@@ -235,8 +228,8 @@ class _ExampleStatsCard extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
-          const Row(
+          SizedBox(height: 16),
+          Row(
             children: [
               Expanded(
                 child: _StatCell(
@@ -265,9 +258,6 @@ class _ExampleStatsCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  STAT CELL
-// ─────────────────────────────────────────────
 class _StatCell extends StatelessWidget {
   final String value;
   final String unit;
@@ -323,33 +313,39 @@ class _StatCell extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FOOTER BUTTONS
-// ─────────────────────────────────────────────
 class _FooterButtons extends StatelessWidget {
   const _FooterButtons();
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final skipBg = isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFF3F4F6);
+    final skipText = isDark ? AppColors.darkTextSecondary : const Color(0xFF9CA3AF);
+
     return Row(
       children: [
         // Skip
         Expanded(
           child: GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MainAuthScreen()),
+              );
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: skipBg,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text(
+              child: Text(
                 'Skip',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF9CA3AF),
+                  color: skipText,
                 ),
               ),
             ),
@@ -363,14 +359,14 @@ class _FooterButtons extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => WaterIntakeScreen()),
+                MaterialPageRoute(builder: (context) => const WaterIntakeScreen()),
               );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFF6B35), Color(0xFFE8105A)],
+                  colors: [Color(0xFF10B981), Color(0xFF059669)],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),

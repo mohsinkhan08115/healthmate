@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:healthmate/component_widgets/meals_widgets/breakfast_widget.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 import 'package:healthmate/models/meals_model.dart';
 
 class MealsScreen extends StatelessWidget {
   const MealsScreen({super.key});
 
-  Widget _buildTipRow(String tip) {
+  Widget _buildTipRow(BuildContext context, String tip) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -17,8 +21,8 @@ class MealsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               tip,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: textSecondary,
                 fontSize: 12,
               ),
             ),
@@ -30,16 +34,22 @@ class MealsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
             // Header Text
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -48,15 +58,15 @@ class MealsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: textPrimary,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     "Healthy meal ideas for every time of day",
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: textSecondary,
                     ),
                   ),
                 ],
@@ -160,29 +170,23 @@ class MealsScreen extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.01),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: borderColor, width: 1),
+                  boxShadow: AppTheme.cardShadow(context),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.star_rounded, color: AppColors.primary, size: 20),
-                        SizedBox(width: 8),
+                      children: [
+                        const Icon(Icons.star_rounded, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 8),
                         Text(
                           "Nutrition Tips",
                           style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -190,10 +194,10 @@ class MealsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildTipRow("Aim for 20-30g of protein per meal"),
-                    _buildTipRow("Include colorful vegetables in every meal"),
-                    _buildTipRow("Stay hydrated throughout the day"),
-                    _buildTipRow("Eat within 1-2 hours after waking up"),
+                    _buildTipRow(context, "Aim for 20-30g of protein per meal"),
+                    _buildTipRow(context, "Include colorful vegetables in every meal"),
+                    _buildTipRow(context, "Stay hydrated throughout the day"),
+                    _buildTipRow(context, "Eat within 1-2 hours after waking up"),
                   ],
                 ),
               ),

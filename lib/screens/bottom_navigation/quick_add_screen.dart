@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 import 'package:healthmate/models/food_model.dart';
 
 class QuickAddScreen extends StatelessWidget {
@@ -10,33 +11,32 @@ class QuickAddScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+
     // ignore: unused_local_variable
     final uid = FirebaseAuth.instance.currentUser?.uid;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.01),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Quick Add",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -49,6 +49,7 @@ class QuickAddScreen extends StatelessWidget {
               childAspectRatio: 1.9,
               children: [
                 QuickItem(
+                  context,
                   "assets/images/Burger.png",
                   "Beef Burger",
                   540,
@@ -60,6 +61,7 @@ class QuickAddScreen extends StatelessWidget {
                   AppColors.water,
                 ),
                 QuickItem(
+                  context,
                   "assets/images/rice.png",
                   "White Rice",
                   130,
@@ -71,6 +73,7 @@ class QuickAddScreen extends StatelessWidget {
                   AppColors.protein,
                 ),
                 QuickItem(
+                  context,
                   "assets/images/fried-egg.png",
                   "Fried Egg",
                   90,
@@ -82,6 +85,7 @@ class QuickAddScreen extends StatelessWidget {
                   AppColors.calories,
                 ),
                 QuickItem(
+                  context,
                   "assets/images/white-bread.png",
                   "White Bread",
                   80,
@@ -93,6 +97,7 @@ class QuickAddScreen extends StatelessWidget {
                   AppColors.primarySoft,
                 ),
                 QuickItem(
+                  context,
                   "assets/images/banana.png",
                   "Banana",
                   105,
@@ -104,6 +109,7 @@ class QuickAddScreen extends StatelessWidget {
                   AppColors.steps,
                 ),
                 QuickItem(
+                  context,
                   "assets/images/milk.png",
                   "Milk (240ml)",
                   149,
@@ -124,6 +130,7 @@ class QuickAddScreen extends StatelessWidget {
 }
 
 Widget QuickItem(
+  BuildContext context,
   String imagePath,
   String label,
   double calories,
@@ -134,6 +141,11 @@ Widget QuickItem(
   Color bgColor,
   Color textColor,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final itemBg = isDark ? AppColors.darkBackground : Colors.white;
+  final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+  final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+
   Color trackColor = AppColors.caloriesTrack;
 
   final lowerLabel = label.toLowerCase();
@@ -144,7 +156,11 @@ Widget QuickItem(
   } else if (lowerLabel.contains("milk") || lowerLabel.contains("burger")) {
     trackColor = AppColors.waterTrack;
   } else if (lowerLabel.contains("egg")) {
-    trackColor = AppColors.stepsTrack; // Use light green for egg/breakfast
+    trackColor = AppColors.stepsTrack;
+  }
+
+  if (isDark) {
+    trackColor = trackColor.withOpacity(0.2);
   }
 
   return GestureDetector(
@@ -165,9 +181,9 @@ Widget QuickItem(
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: itemBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         children: [
@@ -189,10 +205,10 @@ Widget QuickItem(
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -221,4 +237,3 @@ Widget QuickItem(
     ),
   );
 }
-

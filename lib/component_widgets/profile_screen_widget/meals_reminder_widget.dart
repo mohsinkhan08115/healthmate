@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/profile_controller.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 import 'package:healthmate/services/notification_service.dart';
 import 'package:hive/hive.dart';
-import 'package:healthmate/core/theme/app_colors.dart';
 
 class MealsReminderWidget extends StatelessWidget {
   MealsReminderWidget({super.key});
@@ -13,35 +14,34 @@ class MealsReminderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.01),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
-                Icon(Icons.notifications_active_outlined, color: AppColors.primary, size: 20),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.notifications_active_outlined, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
                 Text(
                   "Meal Reminders",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                 ),
               ],
@@ -53,7 +53,7 @@ class MealsReminderWidget extends StatelessWidget {
                 Icons.wb_sunny_rounded,
                 "Breakfast",
                 AppColors.breakfast,
-                AppColors.stepsTrack,
+                AppColors.breakfast.withOpacity(isDark ? 0.2 : 0.12),
                 "${controller.breakfastHour.value.toString().padLeft(2, '0')}:${controller.breakfastMinute.value.toString().padLeft(2, '0')}",
                 controller.breakfastReminder.value,
                 controller.toggleBreakfast,
@@ -86,14 +86,14 @@ class MealsReminderWidget extends StatelessWidget {
                 },
               ),
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: borderColor, height: 1),
             Obx(
               () => _buildReminderRow(
                 context,
                 Icons.lunch_dining_rounded,
                 "Lunch",
                 AppColors.lunch,
-                AppColors.waterTrack,
+                AppColors.lunch.withOpacity(isDark ? 0.2 : 0.12),
                 "${controller.lunchHour.value.toString().padLeft(2, '0')}:${controller.lunchMinute.value.toString().padLeft(2, '0')}",
                 controller.lunchReminder.value,
                 controller.toggleLunch,
@@ -127,14 +127,14 @@ class MealsReminderWidget extends StatelessWidget {
                 },
               ),
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: borderColor, height: 1),
             Obx(
               () => _buildReminderRow(
                 context,
                 Icons.nightlight_round,
                 "Dinner",
                 AppColors.dinner,
-                AppColors.proteinTrack,
+                AppColors.dinner.withOpacity(isDark ? 0.2 : 0.12),
                 "${controller.dinnerHour.value.toString().padLeft(2, '0')}:${controller.dinnerMinute.value.toString().padLeft(2, '0')}",
                 controller.dinnerReminder.value,
                 controller.toggleDinner,
@@ -185,6 +185,10 @@ class MealsReminderWidget extends StatelessWidget {
     Function(bool) onchanged, {
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(vertical: 4),
@@ -199,26 +203,26 @@ class MealsReminderWidget extends StatelessWidget {
       ),
       title: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
+          color: textPrimary,
         ),
       ),
       subtitle: Text(
         time,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
-          color: AppColors.textSecondary,
+          color: textSecondary,
         ),
       ),
       trailing: Switch(
         value: value,
         onChanged: onchanged,
-        activeThumbColor: AppColors.primary,
-        activeTrackColor: AppColors.primary.withOpacity(0.3),
+        activeThumbColor: Colors.white,
+        activeTrackColor: AppColors.accent,
         inactiveThumbColor: Colors.white,
-        inactiveTrackColor: Colors.grey.shade200,
+        inactiveTrackColor: isDark ? Colors.white.withOpacity(0.12) : AppColors.border,
       ),
     );
   }

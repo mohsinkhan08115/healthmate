@@ -7,6 +7,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:healthmate/component_widgets/achivement_widgets.dart';
 import 'package:healthmate/models/chart_model.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 
 class StepsScreen extends StatelessWidget {
   StepsScreen({super.key});
@@ -15,8 +16,14 @@ class StepsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,25 +36,19 @@ class StepsScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.01),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: borderColor, width: 1),
+                  boxShadow: AppTheme.cardShadow(context),
                 ),
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       "Today's Steps",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: textPrimary,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -66,7 +67,7 @@ class StepsScreen extends StatelessWidget {
                                   0.0,
                                   1.0,
                                 ),
-                                backgroundColor: AppColors.stepsTrack,
+                                backgroundColor: AppColors.steps.withOpacity(isDark ? 0.2 : 0.12),
                                 color: AppColors.steps,
                                 strokeWidth: 8,
                                 strokeCap: StrokeCap.round,
@@ -77,18 +78,18 @@ class StepsScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   controller.steps.value.toString(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
+                                    color: textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                const Text(
+                                Text(
                                   "steps",
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: textSecondary,
                                   ),
                                 ),
                               ],
@@ -101,10 +102,10 @@ class StepsScreen extends StatelessWidget {
                     Obx(
                       () => Text(
                         "${(controller.stepprogress.value * 100).toStringAsFixed(0)}% of your 10,000 steps goal",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                          color: textSecondary,
                         ),
                       ),
                     ),
@@ -120,25 +121,19 @@ class StepsScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.01),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: borderColor, width: 1),
+                  boxShadow: AppTheme.cardShadow(context),
                 ),
                 child: SfCartesianChart(
                   legend: const Legend(isVisible: false),
                   title: ChartTitle(
                     text: "Weekly Activity",
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: textPrimary,
                     ),
                     alignment: ChartAlignment.near,
                   ),
@@ -146,22 +141,22 @@ class StepsScreen extends StatelessWidget {
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     majorGridLines: const MajorGridLines(width: 0),
-                    axisLine: const AxisLine(width: 1, color: AppColors.border),
-                    labelStyle: const TextStyle(
+                    axisLine: AxisLine(width: 1, color: borderColor),
+                    labelStyle: TextStyle(
                       fontSize: 10,
-                      color: AppColors.textSecondary,
+                      color: textSecondary,
                     ),
                   ),
                   primaryYAxis: NumericAxis(
-                    majorGridLines: const MajorGridLines(
+                    majorGridLines: MajorGridLines(
                       width: 1,
-                      color: AppColors.border,
-                      dashArray: [4, 4],
+                      color: borderColor,
+                      dashArray: const [4, 4],
                     ),
                     axisLine: const AxisLine(width: 0),
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       fontSize: 10,
-                      color: AppColors.textSecondary,
+                      color: textSecondary,
                     ),
                   ),
                   series: [
@@ -170,7 +165,7 @@ class StepsScreen extends StatelessWidget {
                       xValueMapper:
                           (d, _) => DateFormat('E').format(d.date), // Mon, Tue...
                       yValueMapper: (d, _) => d.value,
-                      color: AppColors.water,
+                      color: AppColors.steps,
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(6),
                       ),
@@ -191,9 +186,10 @@ class StepsScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: surfaceColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border, width: 1),
+                        border: Border.all(color: borderColor, width: 1),
+                        boxShadow: AppTheme.cardShadow(context),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -202,7 +198,7 @@ class StepsScreen extends StatelessWidget {
                             height: 40,
                             width: 40,
                             decoration: BoxDecoration(
-                              color: AppColors.stepsTrack,
+                              color: AppColors.steps.withOpacity(isDark ? 0.2 : 0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
@@ -212,11 +208,11 @@ class StepsScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             "Total this week",
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                             textAlign: TextAlign.center,
@@ -225,10 +221,10 @@ class StepsScreen extends StatelessWidget {
                           Obx(
                             () => Text(
                               controller.weeklyStepsTotal.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -241,9 +237,10 @@ class StepsScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: surfaceColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border, width: 1),
+                        border: Border.all(color: borderColor, width: 1),
+                        boxShadow: AppTheme.cardShadow(context),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -252,7 +249,7 @@ class StepsScreen extends StatelessWidget {
                             height: 40,
                             width: 40,
                             decoration: BoxDecoration(
-                              color: AppColors.caloriesTrack,
+                              color: AppColors.calories.withOpacity(isDark ? 0.2 : 0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
@@ -262,11 +259,11 @@ class StepsScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             "Daily average",
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                             textAlign: TextAlign.center,
@@ -275,10 +272,10 @@ class StepsScreen extends StatelessWidget {
                           Obx(
                             () => Text(
                               controller.dailyAverage.toStringAsFixed(0),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -292,14 +289,14 @@ class StepsScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Achievements header
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 "Achievements",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: textPrimary,
                 ),
               ),
             ),

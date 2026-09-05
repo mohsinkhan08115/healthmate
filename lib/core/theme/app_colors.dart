@@ -1,65 +1,73 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // ── Primary brand (violet-purple — dashboard header, steps, buttons) ───────
-  static const Color primary = Color(0xFF6C63FF); // violet-purple
-  static const Color primaryLight = Color(0xFF857DFF); // lighter violet
-  static const Color primarySoft = Color(0xFFA59EFF); // soft violet
-  static const Color primarySurface = Color(0xFFF3F4F6); // neutral light surface
+  // ── Core Brand Accent ──────────────────────────────────────────────────────
+  static const Color primary = Color(0xFF00A86B); // Primary Emerald Green
+  static const Color emerald = Color(0xFF00A86B);
+  static const Color emeraldLightBg = Color(0xFFE8F8F2);
+  static const Color primarySurface = Color(0xFFE8F8F2);
+  static const Color primarySoft = Color(0xFF34D399);
 
-  // ── Semantic / metric colors ───────────────────────────────────────────────
-  static const Color steps = Color(0xFF10B981); // Emerald Green
-  static const Color calories = Color(0xFFEF4444); // Red / Coral
-  static const Color water = Color(0xFF3B82F6); // Blue
-  static const Color protein = Color(0xFF8B5CF6); // Purple
-  
-  // ── Meal specific colors ──────────────────────────────────────────────────
-  static const Color breakfast = Color(0xFFF59E0B); // Warm Amber
-  static const Color lunch = Color(0xFF0EA5E9); // Sky Blue
-  static const Color dinner = Color(0xFF6366F1); // Indigo
+  // ── Category Metric Colors ────────────────────────────────────────────────
+  static const Color steps = Color(0xFF8B5CF6); // Purple
+  static const Color calories = Color(0xFFFF6B4A); // Orange
+  static const Color water = Color(0xFF00B4D8); // Blue
+  static const Color protein = Color(0xFFF59E0B); // Gold
 
-  // ── Progress track tints (8% opacity equivalents of semantic colors) ───────
-  static const Color stepsTrack = Color(0xFFECFDF5);
-  static const Color caloriesTrack = Color(0xFFFEF2F2);
-  static const Color waterTrack = Color(0xFFEFF6FF);
-  static const Color proteinTrack = Color(0xFFF5F3FF);
+  // ── Action Pill & Badge Colors ─────────────────────────────────────────────
+  static const Color lavenderPillLight = Color(0xFFF1EFFF);
+  static const Color lavenderPillDark = Color(0xFF24204F);
+  static const Color lavenderText = Color(0xFF6366F1);
 
-  // ── Neutrals ───────────────────────────────────────────────────────────────
-  static const Color background = Color(0xFFF9FAFB); // sleek light background
-  static const Color surface = Colors.white; // card surface
-  static const Color border = Color(0xFFE5E7EB); // subtle 1px border color
-  static const Color textPrimary = Color(0xFF111827); // dark text
-  static const Color textSecondary = Color(0xFF6B7280); // muted grey text
-
-  // ── Screen gradients (subtle transitions) ──────────────────────────────────
-  static const LinearGradient screenGradient = LinearGradient(
-    colors: [Color(0xFF6C63FF), Color(0xFF5A52E5)],
+  // ── Gradients ──────────────────────────────────────────────────────────────
+  static const LinearGradient indigoGradient = LinearGradient(
+    colors: [Color(0xFF5B4DF5), Color(0xFF4338CA)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient foodGradient = LinearGradient(
-    colors: [Color(0xFFF9FAFB), Color(0xFFF9FAFB)],
+  static const LinearGradient emeraldGradient = LinearGradient(
+    colors: [Color(0xFF00A86B), Color(0xFF10B981)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient stepsGradient = LinearGradient(
-    colors: [Color(0xFFF9FAFB), Color(0xFFF9FAFB)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  // ── Light Theme Palette ────────────────────────────────────────────────────
+  static const Color lightBackground = Color(0xFFF8FAFC);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightBorder = Color(0xFFE2E8F0);
+  static const Color lightTextPrimary = Color(0xFF1E293B);
+  static const Color lightTextSecondary = Color(0xFF64748B);
+  static const Color lightTextMuted = Color(0xFF94A3B8);
+  static const Color lightRingTrack = Color(0xFFF1F5F9);
 
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFF6C63FF), Color(0xFF5A52E5)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  // ── Dark Theme Palette ─────────────────────────────────────────────────────
+  static const Color darkBackground = Color(0xFF0F172A);
+  static const Color darkSurface = Color(0xFF1E293B);
+  static const Color darkBorder = Color(0x0FFFFFFF); // white.withOpacity(0.06)
+  static const Color darkTextPrimary = Color(0xFFF8FAFC);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
+  static const Color darkTextMuted = Color(0xFF64748B);
+  static const Color darkRingTrack = Color(0x1FFFFFFF); // white12
 
-  // ── Specific card colors (mapped to semantic design tokens) ────────────────
-  static const Color weeklySummaryBg = Colors.white;
-  static const Color nutritionCardBg = Colors.white;
-  static const Color monthlyCardBg = Colors.white;
-  static const Color dailyAvgCardBg = Colors.white;
+  // ── Legacy Backwards Compatibility Mappings ────────────────────────────────
+  static const Color accent = Color(0xFF5B4DF5);
+  static const Color breakfast = Color(0xFFF59E0B);
+  static const Color lunch = Color(0xFF00A86B);
+  static const Color dinner = Color(0xFF5B4DF5);
+  static const Color carbs = Color(0xFF00B4D8);
+  static const Color fat = Color(0xFF8B5CF6);
+  static const Color fiber = Color(0xFF00A86B);
+  static const Color background = lightBackground;
+  static const Color surface = lightSurface;
+  static const Color border = lightBorder;
+  static const Color textPrimary = lightTextPrimary;
+  static const Color textSecondary = lightTextSecondary;
+  static const Color textCaption = lightTextMuted;
+  static const Color stepsTrack = Color(0x1F8B5CF6);
+  static const Color caloriesTrack = Color(0x1FFF6B4A);
+  static const Color waterTrack = Color(0x1F00B4D8);
+  static const Color proteinTrack = Color(0x1FF59E0B);
+  static const LinearGradient screenGradient = emeraldGradient;
+  static const LinearGradient buttonGradient = emeraldGradient;
 }
-

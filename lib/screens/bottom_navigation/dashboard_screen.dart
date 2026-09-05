@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/component_widgets/dashboard_card_widgets.dart';
+import 'package:healthmate/component_widgets/food_tile_avatar.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
-import 'package:healthmate/screens/bottom_navigation/add_food_manually.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 import 'package:healthmate/screens/bottom_navigation/monthly_history.dart';
 
-// ignore: must_be_immutable
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
 
-  final DashboardController controller = Get.find();
+  final DashboardController controller = Get.find<DashboardController>();
 
-  void showAddWaterSheet(BuildContext context) async {
-    final water = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => WaterIntake(),
-    );
-    if (water != null) {
-      controller.addWater(water);
-    }
+  void showAddWaterSheet(BuildContext context) {
+    controller.addWater(250);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark
+        ? AppColors.darkSurface
+        : AppColors.lightSurface;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.06)
+        : AppColors.lightBorder;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -34,16 +41,17 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              // Today's Progress Header with Run Km chip
+
+              // ── Today's Progress Header with Run Km chip ────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Today's Progress",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: textPrimary,
                     ),
                   ),
                   Obx(
@@ -53,7 +61,7 @@ class DashboardScreen extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.stepsTrack,
+                        color: AppColors.emerald.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -61,7 +69,7 @@ class DashboardScreen extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.steps,
+                          color: AppColors.emerald,
                         ),
                       ),
                     ),
@@ -70,11 +78,11 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // 2x2 grid of metric cards
+              // ── 2x2 Progress Stat Cards (childAspectRatio: 1.15) ─────────────
               GridView(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1.2,
+                  childAspectRatio: 1.15,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
@@ -89,231 +97,206 @@ class DashboardScreen extends StatelessWidget {
                       progressValue:
                           (controller.steps.value / controller.stepsGoal.value)
                               .clamp(0.0, 1.0),
-                      goalText: "${controller.stepsGoal.value} steps",
+                      goalText: "${controller.stepsGoal.value}",
                     ),
                   ),
                   Obx(
                     () => CardWidgets(
                       text: "Calories",
                       value:
-                          "${controller.totalCalories.value.toStringAsFixed(1)} kcal",
+                          "${controller.totalCalories.value.toStringAsFixed(0)} kcal",
                       icon: Icons.local_fire_department_rounded,
                       progressValue:
                           (controller.totalCalories.value /
                                   controller.caloriesGoal.value)
                               .clamp(0.0, 1.0),
-                      goalText: "${controller.caloriesGoal.value} kcal",
+                      goalText: "${controller.caloriesGoal.value.toInt()} kcal",
                     ),
                   ),
                   Obx(
                     () => CardWidgets(
                       text: "Water Intake",
                       value:
-                          "${controller.totalWater.value.toStringAsFixed(1)} ml",
+                          "${controller.totalWater.value.toStringAsFixed(0)} ml",
                       icon: Icons.water_drop_rounded,
                       progressValue:
                           (controller.totalWater.value /
                                   controller.waterGoal.value)
                               .clamp(0.0, 1.0),
-                      goalText: "${controller.waterGoal.value} ml",
+                      goalText: "${controller.waterGoal.value.toInt()} ml",
                     ),
                   ),
                   Obx(
                     () => CardWidgets(
                       text: "Protein",
                       value:
-                          "${controller.totalProtein.value.toStringAsFixed(1)} g",
+                          "${controller.totalProtein.value.toStringAsFixed(0)} g",
                       icon: Icons.fitness_center_rounded,
                       progressValue:
                           (controller.totalProtein.value /
                                   controller.proteinGoal.value)
                               .clamp(0.0, 1.0),
-                      goalText: "${controller.proteinGoal.value} g",
+                      goalText: "${controller.proteinGoal.value.toInt()} g",
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Monthly History Card Button
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MonthlyHistory(),
+              // ── Full-Width Soft-Lavender Pill Action Button ─────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MonthlyHistory()),
+                    );
+                  },
+                  icon: const Text("📅", style: TextStyle(fontSize: 16)),
+                  label: const Text(
+                    "View Monthly History",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lavenderText,
                     ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border, width: 1),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.calendar_month_rounded,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        "Monthly History",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: AppColors.textSecondary,
-                        size: 14,
-                      ),
-                    ],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark
+                        ? AppColors.lavenderPillDark
+                        : AppColors.lavenderPillLight,
+                    foregroundColor: AppColors.lavenderText,
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Weekly Summary Card
+              // ── WEEKLY SUMMARY CARD (Indigo/Violet Gradient) ────────────────
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border, width: 1),
+                  gradient: AppColors.indigoGradient,
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: const Color(0xFF5B4DF5).withOpacity(0.25),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Weekly Summary",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    // Card Title: Chart icon + "Weekly Summary"
                     Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  color: AppColors.stepsTrack,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.directions_walk_rounded,
-                                  color: AppColors.steps,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Obx(
-                                      () => Text(
-                                        controller.weeklyAverage.toStringAsFixed(
-                                          0,
-                                        ),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    const Text(
-                                      "Avg Steps",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                      children: const [
+                        Icon(
+                          Icons.insert_chart_outlined_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "Weekly Summary",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        Container(
-                          width: 1,
-                          height: 36,
-                          color: AppColors.border,
-                        ),
-                        const SizedBox(width: 16),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Dual Frosted-Glass Stat Boxes
+                    Row(
+                      children: [
+                        // Left Stat Box: Avg Steps
                         Expanded(
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  color: AppColors.caloriesTrack,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.local_fire_department_rounded,
-                                  color: AppColors.calories,
-                                  size: 20,
-                                ),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.15),
+                                width: 1,
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Obx(
-                                      () => Text(
-                                        "${controller.weeklyCaloriesAverage.toStringAsFixed(0)} kcal",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    const Text(
-                                      "Avg Calories",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Avg Steps",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white70,
+                                  ),
                                 ),
+                                const SizedBox(height: 4),
+                                Obx(
+                                  () => Text(
+                                    controller.weeklyAverage.toStringAsFixed(0),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Right Stat Box: Avg Calories
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.15),
+                                width: 1,
                               ),
-                            ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Avg Calories",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Obx(
+                                  () => Text(
+                                    "${controller.weeklyCaloriesAverage.toStringAsFixed(0)} kcal",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -323,18 +306,45 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Recent Meals Header
-              const Text(
-                "Recent Meals",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              // ── RECENT MEALS SECTION ─────────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Recent Meals",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: textPrimary,
+                    ),
+                  ),
+                  Obx(
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.lavenderPillDark
+                            : AppColors.lavenderPillLight,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "${controller.foods.length} items",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lavenderText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
 
-              // Recent Meals dynamic list with Empty State
+              // Dynamic List with Empty State Card
               Obx(() {
                 final recentFoods = controller.foods.reversed.take(10).toList();
 
@@ -343,37 +353,42 @@ class DashboardScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 32,
+                      vertical: 28,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: surfaceColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border, width: 1),
+                      border: Border.all(color: borderColor, width: 1),
+                      boxShadow: AppTheme.cardShadow(context),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.restaurant_outlined,
-                          size: 36,
-                          color: AppColors.textSecondary.withOpacity(0.3),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6366F1).withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            size: 28,
+                            color: Color(0xFF6366F1),
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           "No meals logged yet",
                           style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          "Track your meals in the Food tab",
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
+                        Text(
+                          "Add food from the Food tab",
+                          style: TextStyle(fontSize: 12, color: textSecondary),
                         ),
                       ],
                     ),
@@ -391,44 +406,30 @@ class DashboardScreen extends StatelessWidget {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: surfaceColor,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.border, width: 1),
+                        border: Border.all(color: borderColor, width: 1),
+                        boxShadow: AppTheme.cardShadow(context),
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 4,
                         ),
-                        leading: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.caloriesTrack,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.restaurant_rounded,
-                            color: AppColors.calories,
-                            size: 20,
-                          ),
-                        ),
+                        leading: FoodTileAvatar(foodName: food.name),
                         title: Text(
                           food.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
                           "${food.calories.toStringAsFixed(0)} kcal",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
+                          style: TextStyle(fontSize: 12, color: textSecondary),
                         ),
                         trailing: IconButton(
                           icon: const Icon(

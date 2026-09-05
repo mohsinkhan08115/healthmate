@@ -21,9 +21,11 @@ class _SplishScreenState extends State<SplishScreen>
 
     // Animation start
     Future.delayed(const Duration(milliseconds: 500), () {
-      setState(() {
-        opacity = 1;
-      });
+      if (mounted) {
+        setState(() {
+          opacity = 1;
+        });
+      }
     });
 
     // Navigation
@@ -34,6 +36,9 @@ class _SplishScreenState extends State<SplishScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoBg = isDark ? AppColors.darkSurface : Colors.white;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -48,14 +53,20 @@ class _SplishScreenState extends State<SplishScreen>
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: logoBg,
                   shape: BoxShape.circle,
                 ),
-                child: Image.asset(
-                  "assets/images/step_counter_img.jpg",
-                  height: 80,
+                child: ClipOval(
+                  child: Image.asset(
+                    "assets/images/step_counter_img.jpg",
+                    height: 80,
+                    width: 80,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
+
+              const SizedBox(height: 20),
 
               // App Name
               const Text(
@@ -63,7 +74,7 @@ class _SplishScreenState extends State<SplishScreen>
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.background,
+                  color: Colors.white,
                 ),
               ),
 
@@ -71,13 +82,13 @@ class _SplishScreenState extends State<SplishScreen>
 
               const Text(
                 "Track your health daily",
-                style: TextStyle(fontSize: 14, color: AppColors.background),
+                style: TextStyle(fontSize: 14, color: Colors.white70),
               ),
 
               const SizedBox(height: 40),
 
               // Loader
-              const CircularProgressIndicator(color: AppColors.background),
+              const CircularProgressIndicator(color: Colors.white),
             ],
           ),
         ),

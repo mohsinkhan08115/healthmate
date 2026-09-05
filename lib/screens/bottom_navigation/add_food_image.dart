@@ -1,14 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/models/food_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:healthmate/core/theme/app_colors.dart';
 
 class AddFoodImage extends StatefulWidget {
   const AddFoodImage({super.key});
@@ -22,9 +22,7 @@ class _AddFoodImageState extends State<AddFoodImage> {
   final ImagePicker picker = ImagePicker();
   bool isScanning = false;
 
-  String get _geminiApiKey =>
-      dotenv.env['GEMINI_API_KEY'] ??
-      ''; // Make sure to set this in your .env file
+  String get _geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
   String get _geminiUrl =>
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$_geminiApiKey";
@@ -42,9 +40,17 @@ class _AddFoodImageState extends State<AddFoodImage> {
   }
 
   void showOptions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final textPrimary =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final borderColor =
+        isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -59,18 +65,18 @@ class _AddFoodImageState extends State<AddFoodImage> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "Upload Food Image",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -79,12 +85,15 @@ class _AddFoodImageState extends State<AddFoodImage> {
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withOpacity(isDark ? 0.15 : 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 20),
+                  child: const Icon(Icons.camera_alt_outlined,
+                      color: AppColors.primary, size: 20),
                 ),
-                title: const Text("Take Photo", style: TextStyle(fontWeight: FontWeight.w600)),
+                title: Text("Take Photo",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: textPrimary)),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await pickImage(ImageSource.camera);
@@ -95,12 +104,15 @@ class _AddFoodImageState extends State<AddFoodImage> {
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withOpacity(isDark ? 0.15 : 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.photo_library_outlined, color: AppColors.primary, size: 20),
+                  child: const Icon(Icons.photo_library_outlined,
+                      color: AppColors.primary, size: 20),
                 ),
-                title: const Text("Choose from Gallery", style: TextStyle(fontWeight: FontWeight.w600)),
+                title: Text("Choose from Gallery",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: textPrimary)),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await pickImage(ImageSource.gallery);
@@ -230,13 +242,27 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dragHandleColor =
+        isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+    final textPrimary =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary =
+        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final placeholderBg =
+        isDark ? AppColors.darkBackground : const Color(0xFFF0FDF4);
+    final placeholderBorder = isDark
+        ? Border.all(color: Colors.white.withOpacity(0.15))
+        : Border.all(color: const Color(0xFFDCFCE7));
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(top: 12.0, left: 20.0, right: 20.0, bottom: 24.0),
+          padding: const EdgeInsets.only(
+              top: 12.0, left: 20.0, right: 20.0, bottom: 24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -246,27 +272,27 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: dragHandleColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "Scan Food Image",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Take a photo of your food to auto-estimate macros using AI",
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -277,7 +303,7 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border, width: 1),
+                        border: placeholderBorder,
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -294,9 +320,9 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                         height: 220,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppColors.background,
+                          color: placeholderBg,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border, width: 1),
+                          border: placeholderBorder,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -305,30 +331,33 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                               height: 48,
                               width: 48,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.08),
+                                color: AppColors.primary
+                                    .withOpacity(isDark ? 0.15 : 0.08),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.camera_alt_outlined,
-                                color: AppColors.primary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.primary,
                                 size: 24,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               "Tap to upload or take a photo",
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               "Supports JPG, PNG, WEBP",
                               style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textSecondary,
+                                color: textSecondary,
                               ),
                             ),
                           ],
@@ -343,14 +372,16 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                     onPressed: showOptions,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 1.5),
+                      side: const BorderSide(
+                          color: AppColors.primary, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: const Text(
                       "Retake Photo",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
                 ),
@@ -358,11 +389,13 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
               SizedBox(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: isScanning || selectedImage == null ? null : _saveFood,
+                  onPressed:
+                      isScanning || selectedImage == null ? null : _saveFood,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+                    disabledBackgroundColor:
+                        AppColors.primary.withOpacity(0.4),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -374,7 +407,8 @@ Respond ONLY with raw JSON, no markdown, in this exact format:
                           width: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text(

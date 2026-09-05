@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
 
 class DailyGoals extends StatelessWidget {
   final double steps;
@@ -16,58 +17,62 @@ class DailyGoals extends StatelessWidget {
     required this.water,
   });
 
-  InputDecoration _buildDialogInputDecoration(String label) {
+  InputDecoration _buildDialogInputDecoration(BuildContext context, String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark ? Colors.white.withOpacity(0.15) : AppColors.lightBorder;
+    final labelColor = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: labelColor, fontSize: 13),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     final DashboardController goalsController = Get.find<DashboardController>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.01),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
-                Icon(Icons.check_circle_outline_rounded, color: AppColors.primary, size: 20),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.check_circle_outline_rounded, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
                 Text(
                   "Daily Goals",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                 ),
               ],
@@ -75,44 +80,48 @@ class DailyGoals extends StatelessWidget {
             const SizedBox(height: 16),
             Obx(
               () => _buildGoalRow(
+                context,
                 'Steps Goal',
                 steps,
                 goalsController.stepsGoal.value,
                 AppColors.steps,
-                AppColors.stepsTrack,
+                AppColors.steps.withOpacity(isDark ? 0.2 : 0.12),
                 "steps",
               ),
             ),
             const SizedBox(height: 12),
             Obx(
               () => _buildGoalRow(
+                context,
                 "Calories Goal",
                 calouies,
                 goalsController.caloriesGoal.value,
                 AppColors.calories,
-                AppColors.caloriesTrack,
+                AppColors.calories.withOpacity(isDark ? 0.2 : 0.12),
                 "kcal",
               ),
             ),
             const SizedBox(height: 12),
             Obx(
               () => _buildGoalRow(
+                context,
                 "Protein Goal",
                 protein,
                 goalsController.proteinGoal.value,
                 AppColors.protein,
-                AppColors.proteinTrack,
+                AppColors.protein.withOpacity(isDark ? 0.2 : 0.12),
                 "g",
               ),
             ),
             const SizedBox(height: 12),
             Obx(
               () => _buildGoalRow(
+                context,
                 "Water Goal",
                 water,
                 goalsController.waterGoal.value,
                 AppColors.water,
-                AppColors.waterTrack,
+                AppColors.water.withOpacity(isDark ? 0.2 : 0.12),
                 "ml",
               ),
             ),
@@ -129,8 +138,8 @@ class DailyGoals extends StatelessWidget {
 
                   Get.defaultDialog(
                     title: "Edit Daily Goals",
-                    titleStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                    backgroundColor: Colors.white,
+                    titleStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textPrimary),
+                    backgroundColor: surfaceColor,
                     radius: 16,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     content: Column(
@@ -138,29 +147,29 @@ class DailyGoals extends StatelessWidget {
                         TextField(
                           controller: stepController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: _buildDialogInputDecoration("Steps Goal"),
+                          style: TextStyle(fontSize: 14, color: textPrimary),
+                          decoration: _buildDialogInputDecoration(context, "Steps Goal"),
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: caloriesController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: _buildDialogInputDecoration("Calories Goal (kcal)"),
+                          style: TextStyle(fontSize: 14, color: textPrimary),
+                          decoration: _buildDialogInputDecoration(context, "Calories Goal (kcal)"),
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: proteinController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: _buildDialogInputDecoration("Protein Goal (g)"),
+                          style: TextStyle(fontSize: 14, color: textPrimary),
+                          decoration: _buildDialogInputDecoration(context, "Protein Goal (g)"),
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: waterController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: _buildDialogInputDecoration("Water Goal (ml)"),
+                          style: TextStyle(fontSize: 14, color: textPrimary),
+                          decoration: _buildDialogInputDecoration(context, "Water Goal (ml)"),
                         ),
                         const SizedBox(height: 20),
                         SizedBox(
@@ -213,7 +222,11 @@ class DailyGoals extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalRow(String text, double value, double goal, Color fillColor, Color trackColor, String unit) {
+  Widget _buildGoalRow(BuildContext context, String text, double value, double goal, Color fillColor, Color trackColor, String unit) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     double progress = (value / goal).clamp(0.0, 1.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,29 +236,29 @@ class DailyGoals extends StatelessWidget {
           children: [
             Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: textSecondary,
               ),
             ),
             Text(
               "${value.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} $unit",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: textPrimary,
               ),
             ),
           ],
         ),
         const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(100),
           child: LinearProgressIndicator(
             backgroundColor: trackColor,
             valueColor: AlwaysStoppedAnimation<Color>(fillColor),
-            minHeight: 4,
+            minHeight: 6,
             value: progress,
           ),
         ),

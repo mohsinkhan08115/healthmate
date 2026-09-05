@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:healthmate/component_widgets/button_widgets.dart';
 import 'package:healthmate/component_widgets/google_button.dart';
 import 'package:healthmate/controller/auth_controller/auth_controller.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/screens/auth_screens/info_screen.dart';
 
 // ignore: must_be_immutable
@@ -19,102 +20,118 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
+    final surfaceColor = isDark
+        ? AppColors.darkSurface
+        : AppColors.lightSurface;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.15)
+        : AppColors.lightBorder;
+
+    InputDecoration buildInputDecoration(String hint) {
+      return InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: textSecondary, fontSize: 14),
+        filled: true,
+        fillColor: surfaceColor,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+      );
+    }
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height,
           width: double.infinity,
-          decoration: BoxDecoration(color: Colors.white),
+          decoration: BoxDecoration(color: backgroundColor),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
             child: Column(
-              spacing: 10,
               children: [
-                SizedBox(height: 50),
+                const SizedBox(height: 50),
                 Text(
                   "Create Account",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: textPrimary,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
                   controller: controller.emailcontroller,
-                  decoration: InputDecoration(
-                    hintText: "Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Email"),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: controller.passwordcontroller,
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  // obscureText: true,
+                  obscureText: true,
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Password"),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: controller.confirmpasswordcontroller,
-                  decoration: InputDecoration(
-                    hintText: "Confirm Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  // obscureText: true,
+                  obscureText: true,
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Confirm Password"),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: "Full Name",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Full Name"),
                 ),
-
+                const SizedBox(height: 10),
                 TextField(
                   controller: ageController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: "Age",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Age"),
                 ),
-
+                const SizedBox(height: 10),
                 TextField(
                   controller: weightController,
-                  decoration: InputDecoration(
-                    hintText: "Weight",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Weight"),
                 ),
-
+                const SizedBox(height: 10),
                 TextField(
                   controller: heightController,
-                  decoration: InputDecoration(
-                    hintText: "Height",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: buildInputDecoration("Height"),
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 30),
                 Padding(
-                  padding: const EdgeInsets.only(left: 30.0, right: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
                   child: Obx(() {
                     return controller.isLoading.value
-                        ? CircularProgressIndicator()
+                        ? const CircularProgressIndicator(color: AppColors.primary)
                         : Custombutton(
                             text: "Sign Up",
                             onPressed: () {
@@ -134,11 +151,12 @@ class RegisterScreen extends StatelessWidget {
                           );
                   }),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 GoogleButton(
                   image: Image.asset("assets/images/Google.png"),
                   onPressed: controller.signInWithGoogle,
                 ),
+                const SizedBox(height: 30),
               ],
             ),
           ),

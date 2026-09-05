@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:healthmate/component_widgets/button_widgets.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/screens/auth_screens/login_screen.dart';
 import 'package:healthmate/screens/auth_screens/signup_screen.dart';
 
@@ -13,67 +13,79 @@ class MainAuthScreen extends StatefulWidget {
 }
 
 class _MainAuthScreenState extends State<MainAuthScreen> {
-  //AppColors appColor = AppColors();
-  //late Custombutton custombutton;
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.15)
+        : AppColors.lightBorder;
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-
-          decoration: BoxDecoration(color: Colors.white),
+          decoration: BoxDecoration(color: backgroundColor),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo
-              SizedBox(height: 200),
+              const SizedBox(height: 140),
               Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.black,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-
                 child: const Icon(
                   Icons.fitness_center,
                   size: 80,
-                  color: Colors.green,
+                  color: Colors.white,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Text(
                 "Are You Ready For Fit YourSelf !",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: textPrimary,
                 ),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 12),
               Divider(
-                color: Colors.black,
+                color: borderColor,
                 thickness: 1,
                 indent: 30,
                 endIndent: 30,
               ),
-              // SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
                 child: Text(
                   "Tracking your daily steps helps you stay active and monitor your physical activity. Walking regularly improves heart health, burns calories, and boosts mood. Aim for a daily step goal to build a consistent and healthy routine.",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: textSecondary,
+                    height: 1.5,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 30),
               Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Row(
-                  spacing: 15,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Custombutton(
@@ -83,6 +95,7 @@ class _MainAuthScreenState extends State<MainAuthScreen> {
                         },
                       ),
                     ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Custombutton(
                         text: "Register",
@@ -91,10 +104,10 @@ class _MainAuthScreenState extends State<MainAuthScreen> {
                         },
                       ),
                     ),
-                    SizedBox(height: 200),
                   ],
                 ),
               ),
+              const SizedBox(height: 100),
             ],
           ),
         ),

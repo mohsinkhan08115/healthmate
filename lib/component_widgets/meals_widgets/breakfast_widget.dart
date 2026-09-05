@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:healthmate/models/meals_model.dart';
 import 'package:healthmate/core/theme/app_colors.dart';
+import 'package:healthmate/core/theme/app_theme.dart';
+import 'package:healthmate/models/meals_model.dart';
 
 class MealSectionWidget extends StatelessWidget {
   final String txt;
@@ -18,6 +19,12 @@ class MealSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     Color headerColor = AppColors.primary;
     final lowerTxt = txt.toLowerCase();
     if (lowerTxt.contains("break")) {
@@ -31,16 +38,10 @@ class MealSectionWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: borderColor, width: 1),
+        boxShadow: AppTheme.cardShadow(context),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -51,41 +52,47 @@ class MealSectionWidget extends StatelessWidget {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: headerColor.withOpacity(0.08),
+                color: headerColor.withOpacity(isDark ? 0.2 : 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: headerColor, size: 20),
             ),
             title: Text(
               txt,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: textPrimary,
               ),
             ),
             subtitle: Text(
               subtxt,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: textSecondary,
               ),
             ),
           ),
           const SizedBox(height: 8),
-          ...meals.map((meal) => _mealItemCard(meal)),
+          ...meals.map((meal) => _mealItemCard(context, meal)),
         ],
       ),
     );
   }
 
-  Widget _mealItemCard(Meal meal) {
+  Widget _mealItemCard(BuildContext context, Meal meal) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final innerBg = isDark ? AppColors.darkBackground : const Color(0xFFF8FAFC);
+    final borderColor = isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder;
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: innerBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -93,24 +100,24 @@ class MealSectionWidget extends StatelessWidget {
           height: 36,
           width: 36,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.08),
+            color: AppColors.primary.withOpacity(isDark ? 0.2 : 0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(meal.icon, color: AppColors.primary, size: 18),
         ),
         title: Text(
           meal.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: textPrimary,
           ),
         ),
         subtitle: Text(
           meal.subtitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: AppColors.textSecondary,
+            color: textSecondary,
           ),
         ),
         trailing: Column(

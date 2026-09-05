@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:healthmate/controller/bottom_navi_controller/dashboard_controller.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 
 // ─── Metric enum ──────────────────────────────────────────────────────────────
 
@@ -70,21 +71,21 @@ extension HistoryMetricExt on HistoryMetric {
   Color get color {
     switch (this) {
       case HistoryMetric.steps:
-        return const Color(0xFF5C6BC0);
+        return const Color(0xFF10B981);
       case HistoryMetric.calories:
-        return const Color(0xFFEF6C00);
+        return const Color(0xFFF59E0B);
       case HistoryMetric.protein:
-        return const Color(0xFF2E7D32);
+        return const Color(0xFFEF6B6B);
       case HistoryMetric.carbs:
-        return const Color(0xFFF9A825);
+        return const Color(0xFF60A5FA);
       case HistoryMetric.fat:
-        return const Color(0xFFAD1457);
+        return const Color(0xFFA78BFA);
       case HistoryMetric.fiber:
-        return const Color(0xFF558B2F);
+        return const Color(0xFF34D399);
       case HistoryMetric.water:
-        return const Color(0xFF0277BD);
+        return const Color(0xFF22D3EE);
       case HistoryMetric.runKm:
-        return const Color(0xFFD32F2F);
+        return const Color(0xFFF59E0B);
     }
   }
 }
@@ -514,10 +515,12 @@ class _DayRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasData = value > 0;
     final dateLabel = '${date.day}/${date.month}/${date.year}';
     final dayLabel = isToday ? 'Today' : DateFormat('EEE').format(date);
+    final textPrimary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
 
     final displayValue = isSteps
         ? NumberFormat('#,###').format(value.toInt())
@@ -528,12 +531,12 @@ class _DayRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isToday
-            ? color.withOpacity(0.07)
-            : scheme.surfaceContainerHighest.withOpacity(0.4),
+            ? color.withOpacity(isDark ? 0.2 : 0.08)
+            : (isDark ? AppColors.darkSurface : const Color(0xFFF8FAFC)),
         borderRadius: BorderRadius.circular(14),
         border: isToday
             ? Border.all(color: color.withOpacity(0.35), width: 1.5)
-            : null,
+            : Border.all(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.lightBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -550,7 +553,7 @@ class _DayRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: isToday ? color : scheme.onSurface,
+                        color: isToday ? color : textPrimary,
                       ),
                     ),
                     Text(
@@ -559,7 +562,7 @@ class _DayRow extends StatelessWidget {
                         fontSize: 11,
                         color: isToday
                             ? color.withOpacity(0.7)
-                            : scheme.onSurface.withOpacity(0.45),
+                            : textSecondary,
                       ),
                     ),
                   ],
@@ -578,7 +581,7 @@ class _DayRow extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: isToday ? color : scheme.onSurface,
+                                  color: isToday ? color : textPrimary,
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -586,7 +589,7 @@ class _DayRow extends StatelessWidget {
                                 unit,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: scheme.onSurface.withOpacity(0.45),
+                                  color: textSecondary,
                                 ),
                               ),
                             ],
@@ -608,7 +611,7 @@ class _DayRow extends StatelessWidget {
                         child: Text(
                           '—',
                           style: TextStyle(
-                            color: scheme.onSurface.withOpacity(0.3),
+                            color: textSecondary,
                             fontSize: 16,
                           ),
                         ),
@@ -623,7 +626,7 @@ class _DayRow extends StatelessWidget {
               foodNames.join(', '),
               style: TextStyle(
                 fontSize: 12,
-                color: scheme.onSurface.withOpacity(0.6),
+                color: textSecondary,
               ),
             ),
           ],

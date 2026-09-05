@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:healthmate/core/theme/app_colors.dart';
 import 'package:healthmate/onboarding_screen/neutration_onboarding_screen.dart';
+import 'package:healthmate/screens/auth_screens/main_auth_screen.dart';
 
-// ─────────────────────────────────────────────
-//  COLORS
-// ─────────────────────────────────────────────
-const Color _bgStart = Color(0xFF5B7DE8);
-const Color _bgEnd = Color(0xFF9B50E8);
-const Color _titleColor = Color(0xFF1A1A2E);
-const Color _subtitleColor = Color(0xFF9CA3AF);
-const Color _bodyColor = Color(0xFF4B5563);
-const Color _chipBg = Color(0xFFF3F4F6);
-const Color _accentPurple = Color(0xFF7C5CE4);
+const Color _bgStart = Color(0xFF10B981);
+const Color _bgEnd = Color(0xFF059669);
+const Color _accentPurple = Color(0xFF6C5CE7);
 
-// ─────────────────────────────────────────────
-//  SCREEN
-// ─────────────────────────────────────────────
 class TrackYourStepsScreen extends StatelessWidget {
   const TrackYourStepsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.darkSurface : Colors.white;
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+    final subtitleColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF9CA3AF);
+    final bodyColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF4B5563);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -33,15 +31,15 @@ class TrackYourStepsScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              _ProgressDots(activeIndex: 0),
+              const _ProgressDots(activeIndex: 0),
               const SizedBox(height: 10),
 
-              // ── White card ──
+              // ── Card Container ──
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: SingleChildScrollView(
@@ -53,44 +51,44 @@ class TrackYourStepsScreen extends StatelessWidget {
                         const SizedBox(height: 10),
 
                         // Title
-                        const Text(
+                        Text(
                           'Track Your Steps',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: _titleColor,
+                            color: titleColor,
                           ),
                         ),
                         const SizedBox(height: 8),
 
                         // Subtitle
-                        const Text(
+                        Text(
                           'Monitor your daily walking activity',
-                          style: TextStyle(fontSize: 14, color: _subtitleColor),
+                          style: TextStyle(fontSize: 14, color: subtitleColor),
                         ),
                         const SizedBox(height: 10),
 
                         // Body text
-                        const Text(
+                        Text(
                           'Keep track of every step you take throughout the day. Set goals, view history, and celebrate your achievements!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: _bodyColor,
+                            color: bodyColor,
                             height: 1.55,
                           ),
                         ),
                         const SizedBox(height: 10),
 
                         // Feature rows
-                        _FeatureRow(
+                        const _FeatureRow(
                           icon: Icons.trending_up_rounded,
                           iconColor: _accentPurple,
                           label: 'Daily step counter',
                         ),
 
                         const SizedBox(height: 8),
-                        _FeatureRow(
+                        const _FeatureRow(
                           icon: Icons.workspace_premium_rounded,
                           iconColor: _accentPurple,
                           label: 'Achievements & streaks',
@@ -98,11 +96,11 @@ class TrackYourStepsScreen extends StatelessWidget {
                         const SizedBox(height: 10),
 
                         // Example stats card
-                        _ExampleStatsCard(),
+                        const _ExampleStatsCard(),
                         const SizedBox(height: 10),
 
                         // Footer buttons
-                        _FooterButtons(),
+                        const _FooterButtons(),
                       ],
                     ),
                   ),
@@ -117,9 +115,6 @@ class TrackYourStepsScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  PROGRESS DOTS
-// ─────────────────────────────────────────────
 class _ProgressDots extends StatelessWidget {
   final int activeIndex;
   const _ProgressDots({required this.activeIndex});
@@ -144,9 +139,6 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FEATURE ROW
-// ─────────────────────────────────────────────
 class _FeatureRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -160,11 +152,15 @@ class _FeatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFF3F4F6);
+    final titleColor = isDark ? AppColors.darkTextPrimary : const Color(0xFF1A1A2E);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
-        color: _chipBg,
+        color: chipBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -181,10 +177,10 @@ class _FeatureRow extends StatelessWidget {
           const SizedBox(width: 16),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: _titleColor,
+              color: titleColor,
             ),
           ),
         ],
@@ -193,9 +189,6 @@ class _FeatureRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  EXAMPLE STATS CARD
-// ─────────────────────────────────────────────
 class _ExampleStatsCard extends StatelessWidget {
   const _ExampleStatsCard();
 
@@ -208,14 +201,14 @@ class _ExampleStatsCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF6A8AF8), Color(0xFF9B6AF8)],
+          colors: [Color(0xFF10B981), Color(0xFF059669)],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Example Stats',
             style: TextStyle(
               fontSize: 14,
@@ -223,9 +216,9 @@ class _ExampleStatsCard extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: _StatCell(
                   value: '8,234',
@@ -311,33 +304,39 @@ class _StatCell extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FOOTER BUTTONS
-// ─────────────────────────────────────────────
 class _FooterButtons extends StatelessWidget {
   const _FooterButtons();
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final skipBg = isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFF3F4F6);
+    final skipText = isDark ? AppColors.darkTextSecondary : const Color(0xFF9CA3AF);
+
     return Row(
       children: [
         // Skip
         Expanded(
           child: GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MainAuthScreen()),
+              );
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: skipBg,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text(
+              child: Text(
                 'Skip',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF9CA3AF),
+                  color: skipText,
                 ),
               ),
             ),
@@ -352,7 +351,7 @@ class _FooterButtons extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NutritionTrackingScreen(),
+                  builder: (context) => const NutritionTrackingScreen(),
                 ),
               );
             },
@@ -360,7 +359,7 @@ class _FooterButtons extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF6A8AF8), Color(0xFF9B6AF8)],
+                  colors: [Color(0xFF10B981), Color(0xFF059669)],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
